@@ -216,7 +216,7 @@ class Query implements IQuery
 			}
 		} else {
 			$args = func_get_args();
-			if (count($args) === 2 && preg_match('#^@[a-zA-Z_]+$#', trim($args[0]))) {
+			if (count($args) === 2 && preg_match('#^@[a-zA-Z_.]+$#', trim($args[0]))) {
 				$field = &$args[0];
 				$value = &$args[1];
 				// TODO: Set type of value to property type?

@@ -141,9 +141,10 @@ class Query implements IQuery
 			"'" => FALSE,
 		);
 		$output = '';
-		$statement .= ' '; // to ensure all properties will be translated
-		for ($i = 0; $i < strlen($statement); $i++) {
-			$ch = $statement{$i};
+		for ($i = 0; $i < strlen($statement) + 1; $i++) {
+			// Do one more loop due to succesfuly translating
+			// properties attached to the end of the statement.
+			$ch = @$statement{$i} ?: '';
 			if ($switches['@'] === TRUE) {
 				if (preg_match('#^[a-zA-Z_]$#', $ch)) {
 					$propertyName .= $ch;

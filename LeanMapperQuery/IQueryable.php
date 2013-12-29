@@ -21,11 +21,4 @@ interface IQueryable
 	 */
 	public function getTable();
 
-	/**
-	 * Executes query.
-	 *
-	 * @param  IQuery $query
-	 * @return array
-	 */
-	public function find(IQuery $query);
 }

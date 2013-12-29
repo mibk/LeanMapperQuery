@@ -2,14 +2,13 @@
 
 namespace LeanMapperQuery;
 
-use LeanMapper\Reflection\Property;
-use LeanMapper\Relationship;
-use LeanMapper\IMapper,
-		LeanMapper\Fluent,
-		LeanMapper\ImplicitFilters;
-use LeanMapper\Entity;
-
-use LeanMapperQuery\Exception\Exception;
+use LeanMapper\Reflection\Property,
+    LeanMapper\Relationship,
+    LeanMapper\IMapper,
+    LeanMapper\Fluent,
+    LeanMapper\ImplicitFilters,
+    LeanMapper\Entity,
+    LeanMapperQuery\Exception\Exception;
 
 class Query implements IQuery
 {
@@ -129,7 +128,6 @@ class Query implements IQuery
 	protected final function parseStatement($statement)
 	{
 		if (!is_string($statement)) {
-			// TODO: trigger error
 			throw new Exception('Type of argument $statement is expected to be string. ' . gettype($statement) . ' given.');
 		}
 		$rootTableName = $this->sourceRepository->getTable();
@@ -229,7 +227,7 @@ class Query implements IQuery
 					$field .= ' = ?';
 				}
 			}
-			// Only firt argument is parsed. Other arguments will be maintained
+			// Only first argument is parsed. Other arguments will be maintained
 			// as parameters.
 			$statement = &$args[0];
 			$statement = $this->parseStatement($statement);

@@ -2,13 +2,13 @@
 
 namespace LeanMapperQuery;
 
-use LeanMapper\Reflection\Property,
-    LeanMapper\Relationship,
-    LeanMapper\IMapper,
-    LeanMapper\Fluent,
-    LeanMapper\ImplicitFilters,
-    LeanMapper\Entity,
-    LeanMapperQuery\Exception\Exception;
+use LeanMapper\Reflection\Property;
+use LeanMapper\Relationship;
+use LeanMapper\IMapper;
+use LeanMapper\Fluent;
+use LeanMapper\ImplicitFilters;
+use LeanMapper\Entity;
+use LeanMapperQuery\Exception\Exception;
 
 class Query implements IQuery
 {

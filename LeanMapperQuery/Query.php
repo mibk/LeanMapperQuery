@@ -8,7 +8,11 @@ use LeanMapper\IMapper;
 use LeanMapper\Fluent;
 use LeanMapper\ImplicitFilters;
 use LeanMapper\Entity;
-use LeanMapperQuery\Exception\Exception;
+
+use LeanMapperQuery\Exception\InvalidArgumentException;
+use LeanMapperQuery\Exception\InvalidRelationshipException;
+use LeanMapperQuery\Exception\InvalidStateException;
+use LeanMapperQuery\Exception\MemberAccessException;
 
 class Query implements IQuery
 {
@@ -79,7 +83,7 @@ class Query implements IQuery
 	protected final function traverseToRelatedEntity($currentTable, Property $property)
 	{
 		if (!$property->hasRelationship()) {
-			throw new Exception("Property '$propertyName' in entity '$entityClass' doesn't have any relationship.");
+			throw new InvalidRelationshipException("Property '$propertyName' in entity '$entityClass' doesn't have any relationship.");
 		}
 		$implicitFilters= array();
 		$propertyType = $property->getType();
@@ -119,7 +123,7 @@ class Query implements IQuery
 			$this->joinRelatedTable($relationshipTable, $targetReferencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters);
 
 		} else {
-			throw new Exception("Unknown relationship type. " . get_class($relationship) . ' given.');
+			throw new InvalidRelationshipException('Unknown relationship type. ' . get_class($relationship) . ' given.');
 		}
 
 		return array_merge(array($targetTable), $this->getPropertiesByTable($targetTable));
@@ -128,7 +132,7 @@ class Query implements IQuery
 	protected final function parseStatement($statement)
 	{
 		if (!is_string($statement)) {
-			throw new Exception('Type of argument $statement is expected to be string. ' . gettype($statement) . ' given.');
+			throw new InvalidArgumentException('Type of argument $statement is expected to be string. ' . gettype($statement) . ' given.');
 		}
 		$rootTableName = $this->sourceRepository->getTable();
 		list($rootEntityClass, $rootProperties) = $this->getPropertiesByTable($rootTableName);
@@ -148,7 +152,7 @@ class Query implements IQuery
 					$propertyName .= $ch;
 				} else {
 					if (!array_key_exists($propertyName, $properties)) {
-						throw new Exception("Entity '$entityClass' doesn't have property '$propertyName'.");
+						throw new MemberAccessException("Entity '$entityClass' doesn't have property '$propertyName'.");
 					}
 					$property = $properties[$propertyName];
 
@@ -163,7 +167,7 @@ class Query implements IQuery
 								list($tableName, $entityClass) = $this->traverseToRelatedEntity($tableName, $property);
 								$column = $this->mapper->getPrimaryKey($tableName);
 							} else {
-								throw new Exception("Column missing in property '$propertyName' in entity '$entityClass'");
+								throw new InvalidStateException("Column not specified in property '$propertyName' of entity '$entityClass'");
 							}
 						} else {
 							$column = $property->getColumn();
@@ -205,7 +209,7 @@ class Query implements IQuery
 	{
 		if (is_array($cond)) {
 			if (func_num_args() > 1) {
-				throw new Exception('Number of arguments is limited to 1 if the first argument is array.');
+				throw new InvalidArgumentException('Number of arguments is limited to 1 if the first argument is array.');
 			}
 			foreach ($cond as $key => $value) {
 				if (is_string($key)) {

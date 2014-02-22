@@ -1,7 +1,7 @@
 LeanMapperQuery
 ===============
 
-Concept of Query Object for LeanMapper.
+Concept of Query Object for [LeanMapper](https://github.com/Tharos/LeanMapper).
 
 License
 -------

@@ -244,15 +244,23 @@ class Query implements IQuery
 			}
 		} else {
 			$args = func_get_args();
-			if (count($args) === 2 && preg_match('#^@[a-zA-Z_.]+$#', trim($args[0]))) {
+			$operators = array('=', '<>', '!=', '<=>', '<', '<=', '>', '>=');
+			if (count($args) === 2
+				&& preg_match('#^\s*(@[a-zA-Z_.]+)\s*(|'.implode('|', $operators).')\s*$#', $args[0], $matches)) {
 				$field = &$args[0];
-				$value = &$args[1];
+				list(, $field, $operator) = $matches;
+				$value = $args[1];
 				// TODO: Set type of value to property type?
-				if (is_array($value)) {
-					$field .= ' IN %in';
-				} else {
-					$field .= ' = ?';
+				$placeholder = '?';
+				if (!$operator) {
+					if (is_array($value)) {
+						$operator = 'IN';
+						$placeholder = '%in';
+					} else {
+						$operator = '=';
+					}
 				}
+				$field .= " $operator $placeholder";
 			}
 			// Only first argument is parsed. Other arguments will be maintained
 			// as parameters.

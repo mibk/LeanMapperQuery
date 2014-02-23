@@ -308,6 +308,10 @@ class Query implements IQuery
 					if (is_array($value)) {
 						$operator = 'IN';
 						$placeholder = '%in';
+					} elseif ($value === NULL) {
+						$operator = 'IS';
+						$placeholder = 'NULL';
+						unset($args[1]);
 					} else {
 						$operator = '=';
 					}

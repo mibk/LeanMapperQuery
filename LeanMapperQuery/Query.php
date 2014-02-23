@@ -16,6 +16,17 @@ use LeanMapperQuery\Exception\MemberAccessException;
 
 class Query implements IQuery
 {
+	private static $defaultPlaceholder = '?';
+
+	private static $placeholders = array(
+		'string' => '%s',
+		'boolean' => '%b',
+		'integer' => '%i',
+		'float' => '%f',
+		'Datetime' => '%t',
+		'Date' => '%d',
+	);
+
 
 	/** @var IQueryable */
 	protected $sourceRepository;
@@ -152,7 +163,34 @@ class Query implements IQuery
 		return array_merge(array($targetTable, $targetTableAlias), $this->getPropertiesByTable($targetTable));
 	}
 
-	private function parseStatement($statement)
+	private function replacePlaceholder(Property $property)
+	{
+		$type = $property->getType();
+		if ($property->isBasicType()) {
+			if (array_key_exists($type, self::$placeholders)) {
+				return self::$placeholders[$type];
+			} else {
+				return self::$defaultPlaceholder;
+			}
+		} else {
+			if ($type === 'Datetime' || is_subclass_of($type, 'Datetime')) {
+				if ($property->hasCustomFlag('type')) {
+					$type = $property->getCustomFlagValue('type');
+					if (preg_match('#^(DATE|Date|date)$#', $type)) {
+						return self::$placeholders['Date'];
+					} else {
+						return self::$placeholders['Datetime'];
+					}
+				} else {
+					return self::$placeholders['Datetime'];
+				}
+			} else {
+				return self::$defaultPlaceholder;
+			}
+		}
+	}
+
+	private function parseStatement($statement, $replacePlaceholders = FALSE)
 	{
 		if (!is_string($statement)) {
 			throw new InvalidArgumentException('Type of argument $statement is expected to be string. ' . gettype($statement) . ' given.');
@@ -166,6 +204,7 @@ class Query implements IQuery
 			"'" => FALSE,
 		);
 		$output = '';
+		$property = NULL;
 		for ($i = 0; $i < strlen($statement) + 1; $i++) {
 			// Do one more loop due to succesfuly translating
 			// properties attached to the end of the statement.
@@ -187,8 +226,9 @@ class Query implements IQuery
 						{
 							// If the last property also has relationship replace with primary key field value.
 							if ($property->hasRelationship()) {
-								list($tableName) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
+								list($tableName, , , $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
 								$column = $this->mapper->getPrimaryKey($tableName);
+								$property = $properties[$column];
 							} else {
 								throw new InvalidStateException("Column not specified in property '$propertyName' of entity '$entityClass'");
 							}
@@ -206,6 +246,16 @@ class Query implements IQuery
 				$properties = $rootProperties;
 				$tableNameAlias = $tableName = $rootTableName;
 				$entityClass = $rootEntityClass;
+
+			} elseif ($replacePlaceholders && $ch === self::$defaultPlaceholder && $switches["'"] === FALSE && $switches['"'] === FALSE) {
+				if ($property === NULL) {
+					$output .= $ch;
+				} else {
+					// Dumb replacing placeholder.
+					// NOTE: Placeholders are replaced by the type of last found property.
+					// 	It is stupid as it doesn't work for all kinds of SQL statements.
+					$output .= $this->replacePlaceholder($property);
+				}
 			} else {
 				if ($ch === '"' && $switches["'"] === FALSE) {
 					$switches['"'] = !$switches['"'];
@@ -243,15 +293,17 @@ class Query implements IQuery
 				}
 			}
 		} else {
+			$replacePlaceholders = FALSE;
 			$args = func_get_args();
 			$operators = array('=', '<>', '!=', '<=>', '<', '<=', '>', '>=');
 			if (count($args) === 2
 				&& preg_match('#^\s*(@[a-zA-Z_.]+)\s*(|'.implode('|', $operators).')\s*$#', $args[0], $matches)) {
+				$replacePlaceholders = TRUE;
 				$field = &$args[0];
 				list(, $field, $operator) = $matches;
 				$value = $args[1];
-				// TODO: Set type of value to property type?
-				$placeholder = '?';
+
+				$placeholder = self::$defaultPlaceholder;
 				if (!$operator) {
 					if (is_array($value)) {
 						$operator = 'IN';
@@ -265,7 +317,7 @@ class Query implements IQuery
 			// Only first argument is parsed. Other arguments will be maintained
 			// as parameters.
 			$statement = &$args[0];
-			$statement = $this->parseStatement($statement);
+			$statement = $this->parseStatement($statement, $replacePlaceholders);
 			$statement = "($statement)";
 			// Replace instances of Entity for its values.
 			foreach ($args as &$arg) {

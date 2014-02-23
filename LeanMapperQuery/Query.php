@@ -37,7 +37,7 @@ class Query implements IQuery
 		$this->fluent = $sourceRepository->createFluent();
 	}
 
-	protected final function getPropertiesByTable($tableName)
+	private	 function getPropertiesByTable($tableName)
 	{
 		$entityClass = $this->mapper->getEntityClass($tableName);
 		$reflection = $entityClass::getReflection($this->mapper);
@@ -48,14 +48,36 @@ class Query implements IQuery
 		return array($entityClass, $properties);
 	}
 
+	private function getTableAlias($currentTable, $targetTable, $viaColumn)
+	{
+		// Tables can be joined via different columns from the same table,
+		// or from different tables via column with the same name.
+		$localKey = $targetTable . '_' . $viaColumn;
+		$globalKey = $currentTable . '_' . $localKey;
+		if (array_key_exists($globalKey, $this->appliedJoins)) {
+			return array(TRUE, $this->appliedJoins[$globalKey]);
+		}
+		// Find the tiniest unique table alias.
+		if (!in_array($targetTable, $this->appliedJoins)) {
+			$value = $targetTable;
+		} elseif (!in_array($localKey, $this->appliedJoins)) {
+			$value = $localKey;
+		} else {
+			$value = $globalKey;
+		}
+		$this->appliedJoins[$globalKey] = $value;
+		return array(FALSE, $value);
+	}
+
 	private function joinRelatedTable($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $filters = array())
 	{
+		list($alreadyJoined, $alias) = $this->getTableAlias($currentTable, $targetTable, $referencingColumn);
 		// Join if not already joined.
-		// TODO: Is it sufficient method?
-		if (!in_array($targetTable, $this->appliedJoins)) {
+		if (!$alreadyJoined) {
 			if (empty($filters)) {
 				// Do simple join.
-				$this->fluent->leftJoin($targetTable)->on("[$currentTable].[$referencingColumn] = [$targetTable].[$targetTablePrimaryKey]");
+				$this->fluent->leftJoin("[$targetTable]" . ($targetTable !== $alias ? " [$alias]" : ''))
+					->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
 			} else {
 				// Join sub-query due to applying implicit filters.
 				$subFluent = new Fluent($this->fluent->getConnection());
@@ -69,18 +91,19 @@ class Query implements IQuery
 				}
 				foreach ($filters as $filter) {
 					$args = array($filter);
-					if (is_string($filter) and array_key_exists($filter, $targetedArgs)) {
+					if (is_string($filter) && array_key_exists($filter, $targetedArgs)) {
 						$args = array_merge($args, $targetedArgs[$filter]);
 					}
 					call_user_func_array(array($subFluent, 'applyFilter'), $args);
 				}
-				$this->fluent->leftJoin($subFluent, $targetTable)->on("[$currentTable].[$referencingColumn] = [$targetTable].[$targetTablePrimaryKey]");
+				$this->fluent->leftJoin($subFluent, "[$alias]")->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
 			}
-			$this->appliedJoins[] = $targetTable;
+			$this->appliedJoins[] = $alias;
 		}
+		return $alias;
 	}
 
-	protected final function traverseToRelatedEntity($currentTable, Property $property)
+	private function traverseToRelatedEntity($currentTable, $currentTableAlias, Property $property)
 	{
 		if (!$property->hasRelationship()) {
 			throw new InvalidRelationshipException("Property '$propertyName' in entity '$entityClass' doesn't have any relationship.");
@@ -98,7 +121,7 @@ class Query implements IQuery
 			$targetTablePrimaryKey = $this->mapper->getPrimaryKey($targetTable);
 			$referencingColumn = $relationship->getColumnReferencingTargetTable();
 			// Join table.
-			$this->joinRelatedTable($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters);
+			$targetTableAlias = $this->joinRelatedTable($currentTableAlias, $referencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters);
 
 		} elseif ($relationship instanceof Relationship\BelongsTo) { // BelongsToOne, BelongsToMany
 			// TODO: Involve getStrategy()?
@@ -106,7 +129,7 @@ class Query implements IQuery
 			$sourceTablePrimaryKey = $this->mapper->getPrimaryKey($currentTable);
 			$referencingColumn = $relationship->getColumnReferencingSourceTable();
 			// Join table.
-			$this->joinRelatedTable($currentTable, $sourceTablePrimaryKey, $targetTable, $referencingColumn, $implicitFilters);
+			$targetTableAlias = $this->joinRelatedTable($currentTableAlias, $sourceTablePrimaryKey, $targetTable, $referencingColumn, $implicitFilters);
 
 		} elseif ($relationship instanceof Relationship\HasMany) {
 			// TODO: Involve getStrategy()?
@@ -119,17 +142,17 @@ class Query implements IQuery
 			$targetTablePrimaryKey = $this->mapper->getPrimaryKey($targetTable);
 			// Join tables.
 			// Don't apply filters on relationship table.
-			$this->joinRelatedTable($currentTable, $sourceTablePrimaryKey, $relationshipTable, $sourceReferencingColumn);
-			$this->joinRelatedTable($relationshipTable, $targetReferencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters);
+			$relationshipTableAlias = $this->joinRelatedTable($currentTableAlias, $sourceTablePrimaryKey, $relationshipTable, $sourceReferencingColumn);
+			$targetTableAlias = $this->joinRelatedTable($relationshipTableAlias, $targetReferencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters);
 
 		} else {
 			throw new InvalidRelationshipException('Unknown relationship type. ' . get_class($relationship) . ' given.');
 		}
 
-		return array_merge(array($targetTable), $this->getPropertiesByTable($targetTable));
+		return array_merge(array($targetTable, $targetTableAlias), $this->getPropertiesByTable($targetTable));
 	}
 
-	protected final function parseStatement($statement)
+	private function parseStatement($statement)
 	{
 		if (!is_string($statement)) {
 			throw new InvalidArgumentException('Type of argument $statement is expected to be string. ' . gettype($statement) . ' given.');
@@ -157,14 +180,14 @@ class Query implements IQuery
 					$property = $properties[$propertyName];
 
 					if ($ch === '.') {
-						list($tableName, $entityClass, $properties) = $this->traverseToRelatedEntity($tableName, $property);
+						list($tableName, $tableNameAlias, $entityClass, $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
 						$propertyName = '';
 					} else {
 						if ($property->getColumn() === NULL)
 						{
 							// If the last property also has relationship replace with primary key field value.
 							if ($property->hasRelationship()) {
-								list($tableName, $entityClass) = $this->traverseToRelatedEntity($tableName, $property);
+								list($tableName) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
 								$column = $this->mapper->getPrimaryKey($tableName);
 							} else {
 								throw new InvalidStateException("Column not specified in property '$propertyName' of entity '$entityClass'");
@@ -172,7 +195,7 @@ class Query implements IQuery
 						} else {
 							$column = $property->getColumn();
 						}
-						$output .= "[$tableName].[$column]";
+						$output .= "[$tableNameAlias].[$column]";
 						$switches['@'] = FALSE;
 						$output .= $ch;
 					}
@@ -181,7 +204,7 @@ class Query implements IQuery
 				$switches['@'] = TRUE;
 				$propertyName = '';
 				$properties = $rootProperties;
-				$tableName = $rootTableName;
+				$tableNameAlias = $tableName = $rootTableName;
 				$entityClass = $rootEntityClass;
 			} else {
 				if ($ch === '"' && $switches["'"] === FALSE) {

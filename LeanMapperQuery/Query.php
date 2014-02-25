@@ -2,22 +2,37 @@
 
 namespace LeanMapperQuery;
 
-use LeanMapper\Reflection\Property;
-use LeanMapper\Relationship;
-use LeanMapper\IMapper;
+use LeanMapper;
 use LeanMapper\Fluent;
 use LeanMapper\ImplicitFilters;
-use LeanMapper\Entity;
-
+use LeanMapper\IMapper;
+use LeanMapper\Reflection\Property;
+use LeanMapper\Relationship;
 use LeanMapperQuery\Exception\InvalidArgumentException;
+use LeanMapperQuery\Exception\InvalidMethodCallException;
 use LeanMapperQuery\Exception\InvalidRelationshipException;
 use LeanMapperQuery\Exception\InvalidStateException;
 use LeanMapperQuery\Exception\MemberAccessException;
+use LeanMapperQuery\Exception\NonExistingMethodException;
+use LeanMapperQuery\Exception\CommandAlreadyRegisteredException;
 
+/**
+ * @method Query where($cond)
+ * @method Query orderBy($field)
+ * @method Query asc(bool $asc = TRUE)
+ * @method Query desc(bool $desc = TRUE)
+ * @method Query limit(int $limit)
+ * @method Query offset(int $offset)
+ */
 class Query implements IQuery
 {
+	/** @var string */
 	private static $defaultPlaceholder = '?';
 
+	/**
+	 * Placeholders transformation table.
+	 * @var array
+	 */
 	private static $placeholders = array(
 		'string' => '%s',
 		'boolean' => '%b',
@@ -27,28 +42,57 @@ class Query implements IQuery
 		'Date' => '%d',
 	);
 
+	private static $commands = array(
+		'where',
+		'orderBy',
+		'asc',
+		'desc',
+		'limit',
+		'offset'
+	);
 
-	/** @var IQueryable */
-	protected $sourceRepository;
 
-	/** @var IMapper */
-	protected $mapper;
+	/**
+	 * @return bool
+	 */
+	final public static function isCommandRegistered($commandName)
+	{
+		return in_array($commandName, self::$commands);
+	}
+
+	/**
+	 * @param  string $commandName Name of private function to be called
+	 */
+	final public static function registerCommand($commandName)
+	{
+		if (in_array($commandName, self::$commands)) {
+			throw new CommandAlreadyRegisteredException("Command '$commandName' is already registered.");
+		} elseif (!method_exists(get_called_class(), $commandName)) {
+			throw new NonExistingMethodException(get_called_class() . "::$commandName() doesn't exist.");
+		}
+		self::$commands[] = $commandName;
+	}
+
+	////////////////////////////////////////////////////
+
+	/** @var string */
+	protected $rootTable;
 
 	/** @var Fluent */
 	protected $fluent;
 
+	/** @var IMapper */
+	protected $mapper;
+
+
 	/** @var array */
-	protected $appliedJoins = array();
+	private $queue = array();
+
+	/** @var array */
+	private $appliedJoins = array();
 
 
-	public function __construct(IQueryable $sourceRepository, IMapper $mapper)
-	{
-		$this->sourceRepository = $sourceRepository;
-		$this->mapper = $mapper;
-		$this->fluent = $sourceRepository->createFluent();
-	}
-
-	private	 function getPropertiesByTable($tableName)
+	private function getPropertiesByTable($tableName)
 	{
 		$entityClass = $this->mapper->getEntityClass($tableName);
 		$reflection = $entityClass::getReflection($this->mapper);
@@ -117,7 +161,8 @@ class Query implements IQuery
 	private function traverseToRelatedEntity($currentTable, $currentTableAlias, Property $property)
 	{
 		if (!$property->hasRelationship()) {
-			throw new InvalidRelationshipException("Property '$propertyName' in entity '$entityClass' doesn't have any relationship.");
+			$entityClass = $this->mapper->getEntityClass($currentTable);
+			throw new InvalidRelationshipException("Property '{$property->getName()}' in entity '$entityClass' doesn't have any relationship.");
 		}
 		$implicitFilters= array();
 		$propertyType = $property->getType();
@@ -195,7 +240,7 @@ class Query implements IQuery
 		if (!is_string($statement)) {
 			throw new InvalidArgumentException('Type of argument $statement is expected to be string. ' . gettype($statement) . ' given.');
 		}
-		$rootTableName = $this->sourceRepository->getTable();
+		$rootTableName = $this->rootTable;
 		list($rootEntityClass, $rootProperties) = $this->getPropertiesByTable($rootTableName);
 
 		$switches = array(
@@ -268,17 +313,52 @@ class Query implements IQuery
 		return $output;
 	}
 
-	public function createQuery()
+	////////////////////////////////////////////////////
+
+	/**
+	 * @inheritdoc
+	 */
+	public function applyQuery($tableName, Fluent $fluent, IMapper $mapper)
 	{
-		return $this->fluent->fetchAll();
+		$this->rootTable = $tableName;
+		$this->fluent = $fluent;
+		$this->mapper = $mapper;
+
+		foreach ($this->queue as $call) {
+			list($method, $args) = $call;
+			call_user_func_array(array($this, $method), $args);
+		}
+		return $fluent;
 	}
 
-	protected function processToFluent($method, array $args = array())
+	/**
+	 * Enqueues command.
+	 * @param  string $name Command name
+	 * @param  array  $args
+	 * @return self
+	 */
+	public function __call($name, array $args)
 	{
+		if (!in_array($name, self::$commands)) {
+			throw new InvalidMethodCallException('Call to undefined method ' . get_called_class() . "::$name()");
+		}
+		$this->queue[] = array($name, $args);
+		return $this;
+	}
+
+	////////////////////////////////////////////////////
+
+	private function processToFluent($method, array $args = array())
+	{
+		if ($this->fluent === NULL) {
+			throw new InvalidStateException('Method self::executeQueue() must by called first.');
+		}
 		call_user_func_array(array($this->fluent, $method),	$args);
 	}
 
-	public function where($cond)
+	/////////////// basic commands //////////////////////
+
+	private function where($cond)
 	{
 		if (is_array($cond)) {
 			if (func_num_args() > 1) {
@@ -286,7 +366,6 @@ class Query implements IQuery
 			}
 			foreach ($cond as $key => $value) {
 				if (is_string($key)) {
-					// TODO: use preg_match?
 					$this->where($key, $value);
 				} else {
 					$this->where($value);
@@ -325,7 +404,7 @@ class Query implements IQuery
 			$statement = "($statement)";
 			// Replace instances of Entity for its values.
 			foreach ($args as &$arg) {
-				if ($arg instanceof Entity) {
+				if ($arg instanceof LeanMapper\Entity) {
 					$entityTable = $this->mapper->getTable(get_class($arg));
 					$idField = $this->mapper->getEntityField($entityTable, $this->mapper->getPrimaryKey($entityTable));
 					$arg = $arg->$idField;
@@ -333,10 +412,9 @@ class Query implements IQuery
 			}
 			$this->processToFluent('where', $args);
 		}
-		return $this;
 	}
 
-	public function orderBy($field)
+	private function orderBy($field)
 	{
 		if (is_array($field)) {
 			foreach ($field as $key => $value) {
@@ -350,35 +428,30 @@ class Query implements IQuery
 			$field = $this->parseStatement($field);
 			$this->processToFluent('orderBy', array($field));
 		}
-		return $this;
 	}
 
-	public function asc($asc = TRUE)
+	private function asc($asc = TRUE)
 	{
 		if ($asc) {
 			$this->processToFluent('asc');
 		} else {
 			$this->processToFluent('desc');
 		}
-		return $this;
 	}
 
-	public function desc($desc = TRUE)
+	private function desc($desc = TRUE)
 	{
 		$this->asc(!$desc);
-		return $this;
 	}
 
-	public function limit($limit)
+	private function limit($limit)
 	{
 		$this->processToFluent('limit', array($limit));
-		return $this;
 	}
 
-	public function offset($offset)
+	private function offset($offset)
 	{
 		$this->processToFluent('offset', array($offset));
-		return $this;
 	}
 
 }

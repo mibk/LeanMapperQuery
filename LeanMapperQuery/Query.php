@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * This file is part of the LeanMapperQuery extension
+ * for the Lean Mapper library (http://leanmapper.com)
+ * Copyright (c) 2013 Michal Bohuslávek
+ */
+
 namespace LeanMapperQuery;
 
 use LeanMapper;
@@ -17,6 +23,8 @@ use LeanMapperQuery\Exception\NonExistingMethodException;
 use LeanMapperQuery\Exception\CommandAlreadyRegisteredException;
 
 /**
+ * @author Michal Bohuslávek
+ *
  * @method Query where($cond)
  * @method Query orderBy($field)
  * @method Query asc(bool $asc = TRUE)

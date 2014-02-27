@@ -346,6 +346,7 @@ class Query implements IQuery
 			list($method, $args) = $call;
 			call_user_func_array(array($this, $method), $args);
 		}
+		$this->appliedJoins = array(); // reset context
 		return $fluent;
 	}
 

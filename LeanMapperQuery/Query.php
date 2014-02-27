@@ -37,6 +37,13 @@ class Query implements IQuery
 	/** @var string */
 	private static $defaultPlaceholder = '?';
 
+	/** @var string */
+	protected static $variablePatternFirstLetter = '[a-zA-Z_\x7f-\xff]';
+
+	/** @var string */
+	protected static $variablePatternOtherLetters = '[a-zA-Z0-9_\x7f-\xff]';
+
+
 	/**
 	 * Placeholders transformation table.
 	 * @var array
@@ -258,14 +265,17 @@ class Query implements IQuery
 		);
 		$output = '';
 		$property = NULL;
+		$firstLetter = TRUE;
 		for ($i = 0; $i < strlen($statement) + 1; $i++) {
 			// Do one more loop due to succesfuly translating
 			// properties attached to the end of the statement.
-			$ch = @$statement{$i} ?: '';
+			$ch = isset($statement{$i}) ? $statement{$i} : '';
 			if ($switches['@'] === TRUE) {
-				if (preg_match('#^[a-zA-Z_]$#', $ch)) {
+				if (preg_match('#^'.($firstLetter ? self::$variablePatternFirstLetter : self::$variablePatternOtherLetters).'$#', $ch)) {
 					$propertyName .= $ch;
+					$firstLetter = FALSE;
 				} else {
+					$firstLetter = TRUE;
 					if (!array_key_exists($propertyName, $properties)) {
 						throw new MemberAccessException("Entity '$entityClass' doesn't have property '$propertyName'.");
 					}
@@ -383,8 +393,9 @@ class Query implements IQuery
 			$replacePlaceholders = FALSE;
 			$args = func_get_args();
 			$operators = array('=', '<>', '!=', '<=>', '<', '<=', '>', '>=');
+			$variablePattern = self::$variablePatternFirstLetter . self::$variablePatternOtherLetters . '*';
 			if (count($args) === 2
-				&& preg_match('#^\s*(@[a-zA-Z_.]+)\s*(|'.implode('|', $operators).')\s*$#', $args[0], $matches)) {
+				&& preg_match('#^\s*(@(?:'.$variablePattern.'|.)*'.$variablePattern.')\s*(|'.implode('|', $operators).')\s*$#', $args[0], $matches)) {
 				$replacePlaceholders = TRUE;
 				$field = &$args[0];
 				list(, $field, $operator) = $matches;

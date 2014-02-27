@@ -83,7 +83,7 @@ class Query implements IQuery
 		if (in_array($commandName, self::$commands)) {
 			throw new CommandAlreadyRegisteredException("Command '$commandName' is already registered.");
 		} elseif (!method_exists(get_called_class(), $commandName)) {
-			throw new NonExistingMethodException(get_called_class() . "::$commandName() doesn't exist.");
+			throw new NonExistingMethodException('Method ' . get_called_class() . "::$commandName doesn't exist.");
 		}
 		self::$commands[] = $commandName;
 	}
@@ -358,7 +358,7 @@ class Query implements IQuery
 	public function __call($name, array $args)
 	{
 		if (!in_array($name, self::$commands)) {
-			throw new InvalidMethodCallException('Call to undefined method ' . get_called_class() . "::$name()");
+			throw new InvalidMethodCallException('Call to undefined method ' . get_called_class() . "::$name");
 		}
 		$this->queue[] = array($name, $args);
 		return $this;
@@ -368,9 +368,6 @@ class Query implements IQuery
 
 	private function processToFluent($method, array $args = array())
 	{
-		if ($this->fluent === NULL) {
-			throw new InvalidStateException('Method self::executeQueue() must by called first.');
-		}
 		call_user_func_array(array($this->fluent, $method),	$args);
 	}
 

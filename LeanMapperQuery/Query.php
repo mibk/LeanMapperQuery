@@ -91,7 +91,7 @@ class Query implements IQuery
 	////////////////////////////////////////////////////
 
 	/** @var string */
-	protected $rootTable;
+	protected $sourceTableName;
 
 	/** @var Fluent */
 	protected $fluent;
@@ -255,7 +255,7 @@ class Query implements IQuery
 		if (!is_string($statement)) {
 			throw new InvalidArgumentException('Type of argument $statement is expected to be string. ' . gettype($statement) . ' given.');
 		}
-		$rootTableName = $this->rootTable;
+		$rootTableName = $this->sourceTableName;
 		list($rootEntityClass, $rootProperties) = $this->getPropertiesByTable($rootTableName);
 
 		$switches = array(
@@ -336,9 +336,24 @@ class Query implements IQuery
 	/**
 	 * @inheritdoc
 	 */
-	public function applyQuery($tableName, Fluent $fluent, IMapper $mapper)
+	public function applyQuery(Fluent $fluent, IMapper $mapper)
 	{
-		$this->rootTable = $tableName;
+		// NOTE:
+		// $fluent is expected to have once called method Fluent::from
+		// with pure table name as an argument. For example:
+		//   $fluent->from('author');
+		//
+		// Multiple calling Fluent::from method or something like
+		//   $fluent->from('[author]');
+		// is not supported.
+		//
+		// The advantage of this way is that there is no need to explicitly
+		// specify $tableName when calling Query::applyQuery anymore.
+		$fromClause = $fluent->_export('FROM');
+		if (count($fromClause) !== 3 || $fromClause[1] !== '%n') {
+			throw new InvalidArgumentException('Unsupported fluent from clase. Only one calling of \\LeanMapper\\Fluent::from method with pure table name as an argument is supported.');
+		}
+		list(, , $this->sourceTableName) = $fromClause;
 		$this->fluent = $fluent;
 		$this->mapper = $mapper;
 

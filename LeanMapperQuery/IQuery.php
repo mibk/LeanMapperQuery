@@ -18,10 +18,9 @@ interface IQuery
 {
 
 	/**
-	 * @param  string  $tableName
 	 * @param  Fluent  $fluent
 	 * @param  IMapper $mapper
 	 * @return Fluent
 	 */
-	public function applyQuery($tableName, Fluent $fluent, IMapper $mapper);
+	public function applyQuery(Fluent $fluent, IMapper $mapper);
 }

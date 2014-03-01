@@ -15,12 +15,10 @@ use LeanMapper\IMapper;
 use LeanMapper\Reflection\Property;
 use LeanMapper\Relationship;
 use LeanMapperQuery\Exception\InvalidArgumentException;
-use LeanMapperQuery\Exception\InvalidMethodCallException;
 use LeanMapperQuery\Exception\InvalidRelationshipException;
 use LeanMapperQuery\Exception\InvalidStateException;
 use LeanMapperQuery\Exception\MemberAccessException;
 use LeanMapperQuery\Exception\NonExistingMethodException;
-use LeanMapperQuery\Exception\CommandAlreadyRegisteredException;
 
 /**
  * @author Michal Bohuslávek
@@ -38,11 +36,10 @@ class Query implements IQuery
 	private static $defaultPlaceholder = '?';
 
 	/** @var string */
-	protected static $variablePatternFirstLetter = '[a-zA-Z_\x7f-\xff]';
+	private static $variablePatternFirstLetter = '[a-zA-Z_\x7f-\xff]';
 
 	/** @var string */
-	protected static $variablePatternOtherLetters = '[a-zA-Z0-9_\x7f-\xff]';
-
+	private static $variablePatternOtherLetters = '[a-zA-Z0-9_\x7f-\xff]';
 
 	/**
 	 * Placeholders transformation table.
@@ -56,37 +53,6 @@ class Query implements IQuery
 		'Datetime' => '%t',
 		'Date' => '%d',
 	);
-
-	private static $commands = array(
-		'where',
-		'orderBy',
-		'asc',
-		'desc',
-		'limit',
-		'offset'
-	);
-
-
-	/**
-	 * @return bool
-	 */
-	final public static function isCommandRegistered($commandName)
-	{
-		return in_array($commandName, self::$commands);
-	}
-
-	/**
-	 * @param  string $commandName Name of private function to be called
-	 */
-	final public static function registerCommand($commandName)
-	{
-		if (in_array($commandName, self::$commands)) {
-			throw new CommandAlreadyRegisteredException("Command '$commandName' is already registered.");
-		} elseif (!method_exists(get_called_class(), $commandName)) {
-			throw new NonExistingMethodException('Method ' . get_called_class() . "::$commandName doesn't exist.");
-		}
-		self::$commands[] = $commandName;
-	}
 
 	////////////////////////////////////////////////////
 
@@ -373,10 +339,11 @@ class Query implements IQuery
 	 */
 	public function __call($name, array $args)
 	{
-		if (!in_array($name, self::$commands)) {
-			throw new InvalidMethodCallException('Call to undefined method ' . get_called_class() . "::$name");
+		$method = 'command' . ucfirst($name);
+		if (!method_exists($this, $method)) {
+			throw new NonExistingMethodException("Command '$name' doesn't exist. To register this command there should be defined protected method " . get_called_class() . "::$method.");
 		}
-		$this->queue[] = array($name, $args);
+		$this->queue[] = array($method, $args);
 		return $this;
 	}
 
@@ -389,7 +356,7 @@ class Query implements IQuery
 
 	/////////////// basic commands //////////////////////
 
-	private function where($cond)
+	private function commandWhere($cond)
 	{
 		if (is_array($cond)) {
 			if (func_num_args() > 1) {
@@ -446,7 +413,7 @@ class Query implements IQuery
 		}
 	}
 
-	private function orderBy($field)
+	private function commandOrderBy($field)
 	{
 		if (is_array($field)) {
 			foreach ($field as $key => $value) {
@@ -462,7 +429,7 @@ class Query implements IQuery
 		}
 	}
 
-	private function asc($asc = TRUE)
+	private function commandAsc($asc = TRUE)
 	{
 		if ($asc) {
 			$this->processToFluent('asc');
@@ -471,17 +438,17 @@ class Query implements IQuery
 		}
 	}
 
-	private function desc($desc = TRUE)
+	private function commandDesc($desc = TRUE)
 	{
 		$this->asc(!$desc);
 	}
 
-	private function limit($limit)
+	private function commandLimit($limit)
 	{
 		$this->processToFluent('limit', array($limit));
 	}
 
-	private function offset($offset)
+	private function commandOffset($offset)
 	{
 		$this->processToFluent('offset', array($offset));
 	}

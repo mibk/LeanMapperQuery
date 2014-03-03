@@ -199,7 +199,7 @@ class Query implements IQuery
 				return self::$defaultPlaceholder;
 			}
 		} else {
-			if ($type === 'Datetime' || is_subclass_of($type, 'Datetime')) {
+			if ($type === 'DateTime' || is_subclass_of($type, 'DateTime')) {
 				if ($property->hasCustomFlag('type')) {
 					$type = $property->getCustomFlagValue('type');
 					if (preg_match('#^(DATE|Date|date)$#', $type)) {

@@ -317,7 +317,7 @@ class Query implements IQuery
 		// specify $tableName when calling Query::applyQuery anymore.
 		$fromClause = $fluent->_export('FROM');
 		if (count($fromClause) !== 3 || $fromClause[1] !== '%n') {
-			throw new InvalidArgumentException('Unsupported fluent from clase. Only one calling of \\LeanMapper\\Fluent::from method with pure table name as an argument is supported.');
+			throw new InvalidArgumentException('Unsupported fluent from clause. Only one calling of \\LeanMapper\\Fluent::from method with pure table name as an argument is supported.');
 		}
 		list(, , $this->sourceTableName) = $fromClause;
 		$this->fluent = $fluent;

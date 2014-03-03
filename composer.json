@@ -17,6 +17,6 @@
         "tharos/leanmapper": "2.1.*"
     },
     "require-dev": {
-        "nette/tester": "dev-master"
+        "nette/tester": "0.9.3"
     }
 }

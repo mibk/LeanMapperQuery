@@ -12,6 +12,7 @@ class OtherDateTime extends DateTime
 
 /**
  * @property int $id
+ * @property Tag[] $tags m:hasMany
  * @property DateTime $pubdate m:type(date)
  * @property OtherDateTime $created
  * @property string $name
@@ -19,6 +20,14 @@ class OtherDateTime extends DateTime
  * @property bool $available
  */
 class Book extends Entity
+{
+}
+
+/**
+ * @property int $id
+ * @property string $name
+ */
+class Tag extends Entity
 {
 }
 
@@ -53,3 +62,31 @@ $expected = getFluent('book')
 	->where('([book].[available] = %b)', FALSE);
 
 Assert::same($expected->_export(), $fluent->_export());
+
+$fluent = getFluent('book');
+$bookNames = array('PHP', 'Javascript');
+getQuery()
+	->where('@name', $bookNames)
+	->where('@website', NULL)
+	->applyQuery($fluent, $mapper);
+
+$expected = getFluent('book')
+	->where('([book].[name] IN %in)', $bookNames)
+	->where('([book].[website] IS NULL)');
+
+Assert::same($expected->_export(), $fluent->_export());
+
+// Test replacing instances of entities
+$tag = new Tag;
+$tag->makeAlive($entityFactory, $connection, $mapper);
+$tag->attach(2);
+
+$fluent = getFluent('book');
+getQuery()
+	->where('@tags.id', $tag)
+	->applyQuery($fluent, $mapper);
+
+$expected = getFluent('book')
+	->where('([tag].[id] = %i)', 2);
+
+Assert::same($expected->_export('WHERE'), $fluent->_export('WHERE'));

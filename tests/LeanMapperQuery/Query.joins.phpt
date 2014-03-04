@@ -66,6 +66,18 @@ $query->applyQuery($fluent, $mapper);
 $expected = "SELECT [book].* FROM [book] LEFT JOIN [author] ON [book].[author_id] = [author].[id] LEFT JOIN [author] [author_reviewer_id] ON [book].[reviewer_id] = [author_reviewer_id].[id] WHERE ([author].[name] = 'Karel') AND ([author_reviewer_id].[web] = 'http://leanmapper.com')";
 Assert::equal($expected, (string) $fluent);
 
+// Optional specifying of primary key
+$fluent = getFluent('book');
+$query = new Query;
+$query->where('@author', 2);
+$query->applyQuery($fluent, $mapper);
+
+$expected = "SELECT [book].* FROM [book] WHERE ([book].[author_id] = 2)";
+Assert::equal($expected, (string) $fluent);
+
+
+//////////////////////////////
+
 // BelongsTo relationship
 $fluent = getFluent('author');
 $query = new Query;

@@ -3,6 +3,8 @@
 use LeanMapper\Connection;
 use LeanMapper\DefaultEntityFactory;
 use LeanMapper\DefaultMapper;
+use LeanMapper\Fluent;
+use LeanMapperQuery\Query;
 
 if (@!include __DIR__ . '/../vendor/autoload.php') {
 	echo 'Install Nette Tester using `composer update --dev`';
@@ -29,3 +31,15 @@ $connection = new Connection(array(
 
 $mapper = new TestMapper;
 $entityFactory = new DefaultEntityFactory;
+
+function getFluent($table)
+{
+	global $connection;
+	$fluent = new Fluent($connection);
+	return $fluent->select('%n.*', $table)->from($table);
+}
+
+function getQuery()
+{
+	return new Query;
+}

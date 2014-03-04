@@ -1,8 +1,6 @@
 <?php
 
 use LeanMapper\Entity;
-use LeanMapper\Fluent;
-use LeanMapperQuery\Query;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
@@ -29,18 +27,6 @@ class Book extends Entity
  */
 class Tag extends Entity
 {
-}
-
-function getFluent($table)
-{
-	global $connection;
-	$fluent = new Fluent($connection);
-	return $fluent->select('%n.*', $table)->from($table);
-}
-
-function getQuery()
-{
-	return new Query;
 }
 
 /////////// TEST 2 ARGS WHERE ////////////

@@ -6,7 +6,8 @@ use Tester\Assert;
 require_once __DIR__ . '/../bootstrap.php';
 
 class OtherDateTime extends DateTime
-{}
+{
+}
 
 /**
  * @property int $id
@@ -69,7 +70,7 @@ $tag->attach(2);
 
 $fluent = getFluent('book');
 getQuery()
-	->where('@tags.id', $tag)
+	->where('@tags', $tag)
 	->applyQuery($fluent, $mapper);
 
 $expected = getFluent('book')

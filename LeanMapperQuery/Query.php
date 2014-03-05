@@ -251,18 +251,19 @@ class Query implements IQuery
 						list($tableName, $tableNameAlias, $entityClass, $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
 						$propertyName = '';
 					} else {
-						if ($property->getColumn() === NULL)
+						if ($property->hasRelationship())
 						{
 							// If the last property also has relationship replace with primary key field value.
-							if ($property->hasRelationship()) {
-								list($tableName, , , $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
-								$column = $this->mapper->getPrimaryKey($tableName);
-								$property = $properties[$column];
-							} else {
-								throw new InvalidStateException("Column not specified in property '$propertyName' of entity '$entityClass'");
-							}
+							// NOTE: Traversing to a related entity is necessary even for the HasOne
+							//   relationship -> there may be some implicit filters to be applied
+							list($tableName, $tableNameAlias, , $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
+							$column = $this->mapper->getPrimaryKey($tableName);
+							$property = $properties[$column];
 						} else {
 							$column = $property->getColumn();
+							if ($column === NULL) {
+								throw new invalidstateexception("column not specified in property '$propertyname' of entity '$entityclass'");
+							}
 						}
 						$output .= "[$tableNameAlias].[$column]";
 						$switches['@'] = FALSE;

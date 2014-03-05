@@ -16,12 +16,12 @@ class Tag extends Entity
 /**
  * @property int $id
  * @property Author $author m:hasOne
- * @property Author|null $reviewer m:hasOne(reviewer_id)
+ * @property Author|NULL $reviewer m:hasOne(reviewer_id)
  * @property Tag[] $tags m:hasMany
  * @property string $pubdate
  * @property string $name
- * @property string|null $description
- * @property string|null $website
+ * @property string|NULL $description
+ * @property string|NULL $website
  * @property bool $available
  */
 class Book extends Entity
@@ -33,7 +33,7 @@ class Book extends Entity
  * @property string $name
  * @property Book[] $books m:belongsToMany
  * @property Book[] $reviewedBooks m:belongsToMany(reviewer_id)
- * @property string|null $web
+ * @property string|NULL $web
  */
 class Author extends Entity
 {

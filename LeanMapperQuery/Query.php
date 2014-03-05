@@ -441,7 +441,7 @@ class Query implements IQuery
 
 	private function commandDesc($desc = TRUE)
 	{
-		$this->asc(!$desc);
+		$this->commandAsc(!$desc);
 	}
 
 	private function commandLimit($limit)

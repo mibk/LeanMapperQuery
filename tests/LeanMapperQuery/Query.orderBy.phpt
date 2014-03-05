@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Test: LeanMapperQuery\Query ordering methods.
+ * @author Michal Bohuslávek
+ */
+
 use LeanMapper\Entity;
 use Tester\Assert;
 

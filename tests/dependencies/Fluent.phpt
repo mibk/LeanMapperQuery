@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Test: required dependencies.
+ * @author Michal Bohuslávek
+ */
+
 use LeanMapper\Entity;
 use LeanMapper\Filtering;
 use LeanMapper\Fluent;

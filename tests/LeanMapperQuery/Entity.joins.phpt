@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Test: LeanMapperQuery\Entity.
+ * @author Michal Bohuslávek
+ */
+
 use LeanMapper\Repository;
 use LeanMapperQuery\Entity;
 use Tester\Assert;

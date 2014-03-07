@@ -55,6 +55,24 @@ $expected = getFluent('book')
 
 Assert::same($expected->_export(), $fluent->_export());
 
+// Default placeholder is also replaced
+$datetime = new DateTime('2000-04-04');
+$fluent = getFluent('book');
+getQuery()
+	->where('@id = ?', 1)
+	->where('@pubdate = ?', $datetime)
+	->where('@created < ?', $datetime)
+	->where('@available = ?', FALSE)
+	->applyQuery($fluent, $mapper);
+
+$expected = getFluent('book')
+	->where('([book].[id] = %i)', 1)
+	->where('([book].[pubdate] = %d)', $datetime)
+	->where('([book].[created] < %t)', $datetime)
+	->where('([book].[available] = %b)', FALSE);
+
+Assert::same($expected->_export(), $fluent->_export());
+
 $fluent = getFluent('book');
 $bookNames = array('PHP', 'Javascript');
 getQuery()

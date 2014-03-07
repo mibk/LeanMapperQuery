@@ -376,7 +376,7 @@ class Query implements IQuery
 			$operators = array('=', '<>', '!=', '<=>', '<', '<=', '>', '>=');
 			$variablePattern = self::$variablePatternFirstLetter . self::$variablePatternOtherLetters . '*';
 			if (count($args) === 2
-				&& preg_match('#^\s*(@(?:'.$variablePattern.'|\.)*'.$variablePattern.')\s*(|'.implode('|', $operators).')\s*$#', $args[0], $matches)) {
+				&& preg_match('#^\s*(@(?:'.$variablePattern.'|\.)*'.$variablePattern.')\s*(|'.implode('|', $operators).')\s*(?:\?\s*)?$#', $args[0], $matches)) {
 				$replacePlaceholders = TRUE;
 				$field = &$args[0];
 				list(, $field, $operator) = $matches;

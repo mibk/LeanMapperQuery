@@ -365,9 +365,9 @@ class Query implements IQuery
 			}
 			foreach ($cond as $key => $value) {
 				if (is_string($key)) {
-					$this->where($key, $value);
+					$this->commandWhere($key, $value);
 				} else {
-					$this->where($value);
+					$this->commandWhere($value);
 				}
 			}
 		} else {

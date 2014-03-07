@@ -78,6 +78,20 @@ $expected = getFluent('book')
 
 Assert::same($expected->_export(), $fluent->_export());
 
+$fluent = getFluent('book');
+getQuery()
+	->where(array(
+		'@name' => $bookNames,
+		'@available' => FALSE,
+	))
+	->applyQuery($fluent, $mapper);
+
+$expected = getFluent('book')
+	->where('([book].[name] IN %in)', $bookNames)
+	->where('([book].[available] = %b)', FALSE);
+
+Assert::same($expected->_export(), $fluent->_export());
+
 
 // Test replacing instances of entities
 $tag = new Tag;

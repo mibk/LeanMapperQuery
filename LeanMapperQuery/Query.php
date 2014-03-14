@@ -142,7 +142,7 @@ class Query implements IQuery
 		return $alias;
 	}
 
-	private function traverseToRelatedEntity($currentTable, $currentTableAlias, Property $property)
+	private function traverseToRelatedEntity(&$currentTable, &$currentTableAlias, Property $property)
 	{
 		if (!$property->hasRelationship()) {
 			$entityClass = $this->mapper->getEntityClass($currentTable);
@@ -188,8 +188,9 @@ class Query implements IQuery
 		} else {
 			throw new InvalidRelationshipException('Unknown relationship type. ' . get_class($relationship) . ' given.');
 		}
-
-		return array_merge(array($targetTable, $targetTableAlias), $this->getPropertiesByTable($targetTable));
+		$currentTable = $targetTable;
+		$currentTableAlias = $targetTableAlias;
+		return $this->getPropertiesByTable($targetTable);
 	}
 
 	private function replacePlaceholder(Property $property)
@@ -247,7 +248,7 @@ class Query implements IQuery
 					$property = $properties[$propertyName];
 
 					if ($ch === '.') {
-						list($tableName, $tableNameAlias, $entityClass, $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
+						list($entityClass, $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
 						$propertyName = '';
 					} else {
 						if ($property->hasRelationship())
@@ -255,7 +256,7 @@ class Query implements IQuery
 							// If the last property also has relationship replace with primary key field value.
 							// NOTE: Traversing to a related entity is necessary even for the HasOne
 							//   relationship -> there may be some implicit filters to be applied
-							list($tableName, $tableNameAlias, , $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
+							list(, $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
 							$column = $this->mapper->getPrimaryKey($tableName);
 							$property = $properties[$column];
 						} else {

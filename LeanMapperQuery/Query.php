@@ -261,7 +261,7 @@ class Query implements IQuery
 						} else {
 							$column = $property->getColumn();
 							if ($column === NULL) {
-								throw new invalidstateexception("column not specified in property '$propertyname' of entity '$entityclass'");
+								throw new InvalidStateException("Column not specified in property '$propertyName' from entity '$entityClass'.");
 							}
 						}
 						$output .= "[$tableNameAlias].[$column]";

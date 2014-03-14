@@ -44,5 +44,4 @@ $expected = getFluent('book')
 	->orderBy('[book].[name]')->asc()
 	->orderBy('[book].[website]')->desc()
 	->orderBy('[author].[web] DESC');
-
-Assert::equal($expected->_export('ORDER BY'), $fluent->_export('ORDER BY'));
+Assert::same($expected->_export('ORDER BY'), $fluent->_export('ORDER BY'));

@@ -348,13 +348,6 @@ class Query implements IQuery
 		return $this;
 	}
 
-	////////////////////////////////////////////////////
-
-	private function processToFluent($method, array $args = array())
-	{
-		call_user_func_array(array($this->fluent, $method),	$args);
-	}
-
 	/////////////// basic commands //////////////////////
 
 	private function commandWhere($cond)
@@ -410,7 +403,7 @@ class Query implements IQuery
 					$arg = $arg->$idField;
 				}
 			}
-			$this->processToFluent('where', $args);
+			call_user_func_array(array($this->fluent, 'where'),	$args);
 		}
 	}
 
@@ -426,17 +419,13 @@ class Query implements IQuery
 			}
 		} else {
 			$field = $this->parseStatement($field);
-			$this->processToFluent('orderBy', array($field));
+			$this->fluent->orderBy($field);
 		}
 	}
 
 	private function commandAsc($asc = TRUE)
 	{
-		if ($asc) {
-			$this->processToFluent('asc');
-		} else {
-			$this->processToFluent('desc');
-		}
+		$this->fluent->{$asc ? 'asc' : 'desc'}();
 	}
 
 	private function commandDesc($desc = TRUE)
@@ -446,12 +435,12 @@ class Query implements IQuery
 
 	private function commandLimit($limit)
 	{
-		$this->processToFluent('limit', array($limit));
+		$this->fluent->limit($limit);
 	}
 
 	private function commandOffset($offset)
 	{
-		$this->processToFluent('offset', array($offset));
+		$this->fluent->offset($offset);
 	}
 
 }

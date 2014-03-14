@@ -44,7 +44,40 @@ class BookRepository extends BaseRepository
 }
 ```
 
-Then we build a *query*:
+and following entities:
+
+```php
+/**
+ * @property int $id
+ * @property string $name
+ */
+class Tag extends LeanMapper\Entity
+{
+}
+
+/**
+ * @property int $id
+ * @property Author $author m:hasOne
+ * @property Tag[] $tags m:hasMany
+ * @property DateTime $pubdate
+ * @property string $name
+ * @property bool $available
+ */
+class Book extends LeanMapper\Entity
+{
+}
+
+/**
+ * @property int $id
+ * @property string $name
+ * @property Book[] $books m:belongsToMany
+ */
+class Author extends LeanMapper\Entity
+{
+}
+```
+
+We build a *query*:
 
 ```php
 $query = new LeanMapperQuery\Query;
@@ -122,6 +155,9 @@ class BaseEntity extends LeanMapperQuery\Entity
 	}
 }
 
+/*
+ * ...
+ */
 class Book extends BaseEntity
 {
 }

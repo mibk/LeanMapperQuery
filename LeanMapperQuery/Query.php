@@ -41,6 +41,9 @@ class Query implements IQuery
 	/** @var string */
 	private static $variablePatternOtherLetters = '[a-zA-Z0-9_\x7f-\xff]';
 
+	/** @var string */
+	private static $typeFlagName = 'type';
+
 	/**
 	 * Placeholders transformation table.
 	 * @var array
@@ -50,7 +53,7 @@ class Query implements IQuery
 		'boolean' => '%b',
 		'integer' => '%i',
 		'float' => '%f',
-		'Datetime' => '%t',
+		'DateTime' => '%t',
 		'Date' => '%d',
 	);
 
@@ -200,15 +203,11 @@ class Query implements IQuery
 			}
 		} else {
 			if ($type === 'DateTime' || is_subclass_of($type, 'DateTime')) {
-				if ($property->hasCustomFlag('type')) {
-					$type = $property->getCustomFlagValue('type');
-					if (preg_match('#^(DATE|Date|date)$#', $type)) {
+				if ($property->hasCustomFlag(self::$typeFlagName)
+					&& preg_match('#^(DATE|Date|date)$#', $property->getCustomFlagValue(self::$typeFlagName))) {
 						return self::$placeholders['Date'];
-					} else {
-						return self::$placeholders['Datetime'];
-					}
 				} else {
-					return self::$placeholders['Datetime'];
+					return self::$placeholders['DateTime'];
 				}
 			} else {
 				return self::$defaultPlaceholder;

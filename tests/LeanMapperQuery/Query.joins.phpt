@@ -53,8 +53,10 @@ $query = getQuery();
 $query->where('@author.name', 'Karel')
 	->applyQuery($fluent, $mapper);
 
-$expected = "SELECT [book].* FROM [book] LEFT JOIN [author] ON [book].[author_id] = [author].[id] WHERE ([author].[name] = 'Karel')";
-Assert::equal($expected, (string) $fluent);
+$expected = getFluent('book')
+	->leftJoin('author')->on('[book].[author_id] = [author].[id]')
+	->where("([author].[name] = 'Karel')");
+Assert::same((string) $expected, (string) $fluent);
 
 // BelongsTo relationship
 $fluent = getFluent('author');
@@ -62,8 +64,10 @@ getQuery()
 	->where('@books.available', TRUE)
 	->applyQuery($fluent, $mapper);
 
-$expected = "SELECT [author].* FROM [author] LEFT JOIN [book] ON [author].[id] = [book].[author_id] WHERE ([book].[available] = 1)";
-Assert::equal($expected, (string) $fluent);
+$expected = getFluent('author')
+	->leftJoin('book')->on('[author].[id] = [book].[author_id]')
+	->where('([book].[available] = 1)');
+Assert::same((string) $expected, (string) $fluent);
 
 // HasMany relationship
 $fluent = getFluent('book');
@@ -71,8 +75,11 @@ getQuery()
 	->where('@tags.name <>', 'php')
 	->applyQuery($fluent, $mapper);
 
-$expected = "SELECT [book].* FROM [book] LEFT JOIN [book_tag] ON [book].[id] = [book_tag].[book_id] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE ([tag].[name] <> 'php')";
-Assert::equal($expected, (string) $fluent);
+$expected = getFluent('book')
+	->leftJoin('book_tag')->on('[book].[id] = [book_tag].[book_id]')
+	->leftJoin('tag')->on('[book_tag].[tag_id] = [tag].[id]')
+	->where("([tag].[name] <> 'php')");
+Assert::same((string) $expected, (string) $fluent);
 
 
 //////// Multiple join of the same table ////////
@@ -81,8 +88,12 @@ $fluent = getFluent('book');
 $query->where('@reviewer.web', 'http://leanmapper.com')
 	->applyQuery($fluent, $mapper);
 
-$expected = "SELECT [book].* FROM [book] LEFT JOIN [author] ON [book].[author_id] = [author].[id] LEFT JOIN [author] [author_reviewer_id] ON [book].[reviewer_id] = [author_reviewer_id].[id] WHERE ([author].[name] = 'Karel') AND ([author_reviewer_id].[web] = 'http://leanmapper.com')";
-Assert::equal($expected, (string) $fluent);
+$expected = getFluent('book')
+	->leftJoin('author')->on('[book].[author_id] = [author].[id]')
+	->leftJoin('[author] [author_reviewer_id]')->on('[book].[reviewer_id] = [author_reviewer_id].[id]')
+	->where("([author].[name] = 'Karel')")
+	->where("([author_reviewer_id].[web] = 'http://leanmapper.com')");
+Assert::same((string) $expected, (string) $fluent);
 
 
 //////// Optional specifying of primary key ////////
@@ -93,8 +104,10 @@ getQuery()
 	->where('@author', 2)
 	->applyQuery($fluent, $mapper);
 
-$expected = "SELECT [book].* FROM [book] LEFT JOIN [author] ON [book].[author_id] = [author].[id] WHERE ([author].[id] = 2)";
-Assert::equal($expected, (string) $fluent);
+$expected = getFluent('book')
+	->leftJoin('author')->on('[book].[author_id] = [author].[id]')
+	->where('([author].[id] = 2)');
+Assert::same((string) $expected, (string) $fluent);
 
 // HasMany
 $fluent = getFluent('book');
@@ -102,8 +115,11 @@ getQuery()
 	->where('@tags', 2)
 	->applyQuery($fluent, $mapper);
 
-$expected = "SELECT [book].* FROM [book] LEFT JOIN [book_tag] ON [book].[id] = [book_tag].[book_id] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE ([tag].[id] = 2)";
-Assert::equal($expected, (string) $fluent);
+$expected = getFluent('book')
+	->leftJoin('book_tag')->on('[book].[id] = [book_tag].[book_id]')
+	->leftJoin('tag')->on('[book_tag].[tag_id] = [tag].[id]')
+	->where('([tag].[id] = 2)');
+Assert::same((string) $expected, (string) $fluent);
 
 // BelongsTo
 $fluent = getFluent('author');
@@ -111,5 +127,7 @@ getQuery()
 	->where('@books', 2)
 	->applyQuery($fluent, $mapper);
 
-$expected = "SELECT [author].* FROM [author] LEFT JOIN [book] ON [author].[id] = [book].[author_id] WHERE ([book].[id] = 2)";
-Assert::equal($expected, (string) $fluent);
+$expected = getFluent('author')
+	->leftJoin('book')->on('[author].[id] = [book].[author_id]')
+	->where('([book].[id] = 2)');
+Assert::same((string) $expected, (string) $fluent);

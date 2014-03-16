@@ -216,7 +216,7 @@ class Query implements IQuery
 		}
 	}
 
-	private function parseStatement($statement, $replacePlaceholders = FALSE)
+	protected function parseStatement($statement, $replacePlaceholders = FALSE)
 	{
 		if (!is_string($statement)) {
 			throw new InvalidArgumentException('Type of argument $statement is expected to be string. ' . gettype($statement) . ' given.');

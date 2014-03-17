@@ -73,7 +73,7 @@ class Query implements IQuery
 	private $queue = array();
 
 	/** @var array */
-	private $appliedJoins = array();
+	private $tablesAliases;
 
 
 	private function getPropertiesByTable($tableName)
@@ -87,32 +87,40 @@ class Query implements IQuery
 		return array($entityClass, $properties);
 	}
 
-	private function getTableAlias($currentTable, $targetTable, $viaColumn)
+	/**
+	 * Returns TRUE if the $targetTable is already joined.
+	 * @param  string $currentTable
+	 * @param  string $targetTable
+	 * @param  string $viaColumn
+	 * @param  string $alias
+	 * @return bool
+	 */
+	private function getTableAlias($currentTable, $targetTable, $viaColumn, &$alias)
 	{
 		// Tables can be joined via different columns from the same table,
 		// or from different tables via column with the same name.
 		$localKey = $targetTable . '_' . $viaColumn;
 		$globalKey = $currentTable . '_' . $localKey;
-		if (array_key_exists($globalKey, $this->appliedJoins)) {
-			return array(TRUE, $this->appliedJoins[$globalKey]);
+		if (array_key_exists($globalKey, $this->tablesAliases)) {
+			$alias = $this->tablesAliases[$globalKey];
+			return TRUE;
 		}
 		// Find the tiniest unique table alias.
-		if (!in_array($targetTable, $this->appliedJoins)) {
-			$value = $targetTable;
-		} elseif (!in_array($localKey, $this->appliedJoins)) {
-			$value = $localKey;
+		if (!in_array($targetTable, $this->tablesAliases)) {
+			$alias = $targetTable;
+		} elseif (!in_array($localKey, $this->tablesAliases)) {
+			$alias = $localKey;
 		} else {
-			$value = $globalKey;
+			$alias = $globalKey;
 		}
-		$this->appliedJoins[$globalKey] = $value;
-		return array(FALSE, $value);
+		$this->tablesAliases[$globalKey] = $alias;
+		return FALSE;
 	}
 
 	private function joinRelatedTable($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $filters = array())
 	{
-		list($alreadyJoined, $alias) = $this->getTableAlias($currentTable, $targetTable, $referencingColumn);
 		// Join if not already joined.
-		if (!$alreadyJoined) {
+		if (!$this->getTableAlias($currentTable, $targetTable, $referencingColumn, $alias)) {
 			if (empty($filters)) {
 				// Do simple join.
 				$this->fluent->leftJoin("[$targetTable]" . ($targetTable !== $alias ? " [$alias]" : ''))
@@ -137,7 +145,6 @@ class Query implements IQuery
 				}
 				$this->fluent->leftJoin($subFluent, "[$alias]")->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
 			}
-			$this->appliedJoins[] = $alias;
 		}
 		return $alias;
 	}
@@ -323,12 +330,14 @@ class Query implements IQuery
 		list(, , $this->sourceTableName) = $fromClause;
 		$this->fluent = $fluent;
 		$this->mapper = $mapper;
+		// Add source table name to tables aliases list to avoid error
+		// when joining to itself.
+		$this->tablesAliases = array($this->sourceTableName);
 
 		foreach ($this->queue as $call) {
 			list($method, $args) = $call;
 			call_user_func_array(array($this, $method), $args);
 		}
-		$this->appliedJoins = array(); // reset context
 		return $fluent;
 	}
 

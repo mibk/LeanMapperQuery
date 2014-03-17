@@ -131,3 +131,18 @@ $expected = getFluent('author')
 	->leftJoin('book')->on('[author].[id] = [book].[author_id]')
 	->where('([book].[id] = 2)');
 Assert::same((string) $expected, (string) $fluent);
+
+//////// Multiple joins ////////
+
+$fluent = getFluent('book');
+getQuery()
+	->where('@author.books.tags.name', 'foo')
+	->applyQuery($fluent, $mapper);
+
+$expected = getFluent('book')
+	->leftJoin('author')->on('[book].[author_id] = [author].[id]')
+	->leftJoin('[book] [book_id]')->on('[author].[id] = [book_id].[author_id]')
+	->leftJoin('book_tag')->on('[book_id].[id] = [book_tag].[book_id]')
+	->leftJoin('tag')->on('[book_tag].[tag_id] = [tag].[id]')
+	->where("([tag].[name] = 'foo')");
+Assert::same((string) $expected, (string) $fluent);

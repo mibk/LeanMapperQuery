@@ -122,6 +122,6 @@ getQuery()
 	->applyQuery($fluent, $mapper);
 
 $expected = getFluent('book')
-	->where('([tag].[id] = %i)', 2);
+	->where('([book_tag].[tag_id] = %i)', 2);
 
 Assert::same($expected->_export('WHERE'), $fluent->_export('WHERE'));

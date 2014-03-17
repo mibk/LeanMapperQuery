@@ -105,8 +105,7 @@ getQuery()
 	->applyQuery($fluent, $mapper);
 
 $expected = getFluent('book')
-	->leftJoin('author')->on('[book].[author_id] = [author].[id]')
-	->where('([author].[id] = 2)');
+	->where('([book].[author_id] = 2)');
 Assert::same((string) $expected, (string) $fluent);
 
 // HasMany
@@ -117,8 +116,7 @@ getQuery()
 
 $expected = getFluent('book')
 	->leftJoin('book_tag')->on('[book].[id] = [book_tag].[book_id]')
-	->leftJoin('tag')->on('[book_tag].[tag_id] = [tag].[id]')
-	->where('([tag].[id] = 2)');
+	->where('([book_tag].[tag_id] = 2)');
 Assert::same((string) $expected, (string) $fluent);
 
 // BelongsTo
@@ -145,4 +143,16 @@ $expected = getFluent('book')
 	->leftJoin('book_tag')->on('[book_id].[id] = [book_tag].[book_id]')
 	->leftJoin('tag')->on('[book_tag].[tag_id] = [tag].[id]')
 	->where("([tag].[name] = 'foo')");
+Assert::same((string) $expected, (string) $fluent);
+
+$fluent = getFluent('book');
+getQuery()
+	->where('@author', 2)
+	->where('@tags', 2)
+	->applyQuery($fluent, $mapper);
+
+$expected = getFluent('book')
+	->leftJoin('book_tag')->on('[book].[id] = [book_tag].[book_id]')
+	->where('([book].[author_id] = 2)')
+	->where('([book_tag].[tag_id] = 2)');
 Assert::same((string) $expected, (string) $fluent);

@@ -75,6 +75,12 @@ class Query implements IQuery
 	/** @var array */
 	private $tablesAliases;
 
+	/** @var \Closure */
+	private $possibleJoin = NULL;
+
+	/** @var array */
+	private $joinAlternative = array();
+
 
 	private function getPropertiesByTable($tableName)
 	{
@@ -95,7 +101,7 @@ class Query implements IQuery
 	 * @param  string $alias
 	 * @return bool
 	 */
-	private function getTableAlias($currentTable, $targetTable, $viaColumn, &$alias)
+	private function getTableAlias($currentTable, $targetTable, $viaColumn, &$globalKey, &$alias)
 	{
 		// Tables can be joined via different columns from the same table,
 		// or from different tables via column with the same name.
@@ -113,18 +119,72 @@ class Query implements IQuery
 		} else {
 			$alias = $globalKey;
 		}
-		$this->tablesAliases[$globalKey] = $alias;
 		return FALSE;
 	}
 
-	private function joinRelatedTable($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $filters = array())
+	private function registerTableAlias($globalKey, $alias)
+	{
+		if (array_key_exists($globalKey, $this->tablesAliases)) {
+			throw new InvalidStateException("Global key '$globalKey' is already registered.");
+		}
+		$this->tablesAliases[$globalKey] = $alias;
+	}
+
+	private function registerJoin($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $globalKey, $alias)
+	{
+		if ($this->possibleJoin !== NULL) {
+			throw new InvalidStateException('Cannot register new join. There is one registered already.');
+		}
+		$registerTableAliasCallback = array($this, 'registerTableAlias');
+		$this->possibleJoin = function ($fluent)
+			use ($registerTableAliasCallback, $globalKey, $alias, $targetTable, $currentTable, $referencingColumn, $targetTablePrimaryKey) {
+
+			$registerTableAliasCallback($globalKey, $alias);
+			$fluent->leftJoin("[$targetTable]" . ($targetTable !== $alias ? " [$alias]" : ''))
+				->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
+			return $alias;
+		};
+		$this->joinAlternative = array($currentTable, $referencingColumn);
+	}
+
+	private function triggerJoin()
+	{
+		if ($this->possibleJoin !== NULL) {
+			$callback = $this->possibleJoin;
+			$this->possibleJoin = NULL;
+			$callback($this->fluent);
+		}
+	}
+
+	/**
+	 * Dismisses the join and returns alternative table
+	 * and column names.
+	 * @return array(string, string)
+	 */
+	private function dismissJoin()
+	{
+		$this->possibleJoin = NULL;
+		return $this->joinAlternative;
+	}
+
+	/**
+	 * @return bool
+	 */
+	private function pendingJoin()
+	{
+		return $this->possibleJoin !== NULL;
+	}
+
+	private function joinRelatedTable($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $filters = array(), $joinImmediately = TRUE)
 	{
 		// Join if not already joined.
-		if (!$this->getTableAlias($currentTable, $targetTable, $referencingColumn, $alias)) {
+		if (!$this->getTableAlias($currentTable, $targetTable, $referencingColumn, $globalKey, $alias)) {
 			if (empty($filters)) {
 				// Do simple join.
-				$this->fluent->leftJoin("[$targetTable]" . ($targetTable !== $alias ? " [$alias]" : ''))
-					->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
+				// In few cases there is no need to do join immediately -> register join
+				// to decide later.
+				$this->registerJoin($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $globalKey, $alias);
+				$joinImmediately && $this->triggerJoin();
 			} else {
 				// Join sub-query due to applying implicit filters.
 				$subFluent = new Fluent($this->fluent->getConnection());
@@ -144,6 +204,7 @@ class Query implements IQuery
 					call_user_func_array(array($subFluent, 'applyFilter'), $args);
 				}
 				$this->fluent->leftJoin($subFluent, "[$alias]")->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
+				$this->registerTableAlias($globalKey, $alias);
 			}
 		}
 		return $alias;
@@ -168,7 +229,7 @@ class Query implements IQuery
 			$targetTablePrimaryKey = $this->mapper->getPrimaryKey($targetTable);
 			$referencingColumn = $relationship->getColumnReferencingTargetTable();
 			// Join table.
-			$targetTableAlias = $this->joinRelatedTable($currentTableAlias, $referencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters);
+			$targetTableAlias = $this->joinRelatedTable($currentTableAlias, $referencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters, FALSE);
 
 		} elseif ($relationship instanceof Relationship\BelongsTo) { // BelongsToOne, BelongsToMany
 			// TODO: Involve getStrategy()?
@@ -190,7 +251,7 @@ class Query implements IQuery
 			// Join tables.
 			// Don't apply filters on relationship table.
 			$relationshipTableAlias = $this->joinRelatedTable($currentTableAlias, $sourceTablePrimaryKey, $relationshipTable, $sourceReferencingColumn);
-			$targetTableAlias = $this->joinRelatedTable($relationshipTableAlias, $targetReferencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters);
+			$targetTableAlias = $this->joinRelatedTable($relationshipTableAlias, $targetReferencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters, FALSE);
 
 		} else {
 			throw new InvalidRelationshipException('Unknown relationship type. ' . get_class($relationship) . ' given.');
@@ -255,14 +316,16 @@ class Query implements IQuery
 					$property = $properties[$propertyName];
 
 					if ($ch === '.') {
+						$this->triggerJoin();
 						list($entityClass, $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
 						$propertyName = '';
 					} else {
 						if ($property->hasRelationship())
 						{
 							// If the last property also has relationship replace with primary key field value.
-							// NOTE: Traversing to a related entity is necessary even for the HasOne
-							//   relationship -> there may be some implicit filters to be applied
+							// NOTE: Traversing to a related entity is necessary even for the HasOne and HasMany
+							//  relationships if there are implicit filters to be applied.
+							$this->triggerJoin();
 							list(, $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
 							$column = $this->mapper->getPrimaryKey($tableName);
 							$property = $properties[$column];
@@ -271,6 +334,13 @@ class Query implements IQuery
 							if ($column === NULL) {
 								throw new InvalidStateException("Column not specified in property '$propertyName' from entity '$entityClass'.");
 							}
+						}
+						if ($column === $this->mapper->getPrimaryKey($tableName) && $this->pendingJoin()) {
+							// There is a pending join that does not need to be done. Primary key value
+							// is already known from referencing table.
+							list($tableNameAlias, $column) = $this->dismissJoin();
+						} else {
+							$this->triggerJoin();
 						}
 						$output .= "[$tableNameAlias].[$column]";
 						$switches['@'] = FALSE;

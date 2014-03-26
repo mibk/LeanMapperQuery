@@ -75,7 +75,7 @@ class Query implements IQuery
 	/** @var array */
 	private $tablesAliases;
 
-	/** @var \Closure */
+	/** @var array|NULL */
 	private $possibleJoin = NULL;
 
 	/** @var array */
@@ -135,24 +135,18 @@ class Query implements IQuery
 		if ($this->possibleJoin !== NULL) {
 			throw new InvalidStateException('Cannot register new join. There is one registered already.');
 		}
-		$registerTableAliasCallback = array($this, 'registerTableAlias');
-		$this->possibleJoin = function ($fluent)
-			use ($registerTableAliasCallback, $globalKey, $alias, $targetTable, $currentTable, $referencingColumn, $targetTablePrimaryKey) {
-
-			$registerTableAliasCallback($globalKey, $alias);
-			$fluent->leftJoin("[$targetTable]" . ($targetTable !== $alias ? " [$alias]" : ''))
-				->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
-			return $alias;
-		};
+		$this->possibleJoin = func_get_args();
 		$this->joinAlternative = array($currentTable, $referencingColumn);
 	}
 
 	private function triggerJoin()
 	{
 		if ($this->possibleJoin !== NULL) {
-			$callback = $this->possibleJoin;
+			list($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $globalKey, $alias) = $this->possibleJoin;
+			$this->fluent->leftJoin("[$targetTable]" . ($targetTable !== $alias ? " [$alias]" : ''))
+				->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
+			$this->registerTableAlias($globalKey, $alias);
 			$this->possibleJoin = NULL;
-			$callback($this->fluent);
 		}
 	}
 
@@ -203,7 +197,8 @@ class Query implements IQuery
 					}
 					call_user_func_array(array($subFluent, 'applyFilter'), $args);
 				}
-				$this->fluent->leftJoin($subFluent, "[$alias]")->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
+				$this->fluent->leftJoin($subFluent, "[$alias]")
+					->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
 				$this->registerTableAlias($globalKey, $alias);
 			}
 		}

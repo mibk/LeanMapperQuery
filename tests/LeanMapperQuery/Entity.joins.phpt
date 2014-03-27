@@ -115,6 +115,11 @@ Assert::exception(function () use ($book) {
 	$book->find('xyz', getQuery());
 }, 'LeanMapperQuery\\Exception\\MemberAccessException');
 
+Assert::exception(function () {
+	$book = new Book;
+	$book->find('xyz', getQuery());
+}, 'LeanMapperQuery\\Exception\\InvalidStateException');
+
 //////// __call ////////
 
 $author = $authors[2];

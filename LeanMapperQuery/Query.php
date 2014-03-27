@@ -227,7 +227,6 @@ class Query implements IQuery
 			$targetTableAlias = $this->joinRelatedTable($currentTableAlias, $referencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters, FALSE);
 
 		} elseif ($relationship instanceof Relationship\BelongsTo) { // BelongsToOne, BelongsToMany
-			// TODO: Involve getStrategy()?
 			$targetTable = $relationship->getTargetTable();
 			$sourceTablePrimaryKey = $this->mapper->getPrimaryKey($currentTable);
 			$referencingColumn = $relationship->getColumnReferencingSourceTable();
@@ -235,7 +234,6 @@ class Query implements IQuery
 			$targetTableAlias = $this->joinRelatedTable($currentTableAlias, $sourceTablePrimaryKey, $targetTable, $referencingColumn, $implicitFilters);
 
 		} elseif ($relationship instanceof Relationship\HasMany) {
-			// TODO: Involve getStrategy()?
 			$sourceTablePrimaryKey = $this->mapper->getPrimaryKey($currentTable);
 			$relationshipTable = $relationship->getRelationshipTable();
 			$sourceReferencingColumn = $relationship->getColumnReferencingSourceTable();

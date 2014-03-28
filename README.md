@@ -1,7 +1,7 @@
-LeanMapperQuery
-===============
+Lean Mapper Query
+=================
 
-LeanMapperQuery is a concept of a *query object* for [LeanMapper library](https://github.com/Tharos/LeanMapper) which helps to build complex queries using automatic joins (*idea taken from [NotORM library](http://www.notorm.com/)*). Look at the [suggested base classes](https://gist.github.com/mbohuslavek/9410266).
+Lean Mapper Query is a concept of a *query object* for [Lean Mapper library](https://github.com/Tharos/LeanMapper) which helps to build complex queries using automatic joins (*idea taken from [NotORM library](http://www.notorm.com/)*). Look at the [suggested base classes](https://gist.github.com/mbohuslavek/9410266).
 
 Features
 --------
@@ -99,7 +99,7 @@ LEFT JOIN [author] ON [book].[author_id] = [author].[id]
 WHERE ([author].[name] = 'Karel')
 ```
 
-You can see it performs automatic joins via *dot notation*. It supports all types of relationships which are known to **LeanMapper**.
+You can see it performs automatic joins via *dot notation*. It supports all types of relationships which are known to **Lean Mapper**.
 
 It is very easy to use SQL functions. We can update query like this:
 ```php

@@ -20,7 +20,8 @@ class FilterMapper extends TestMapper
 {
 	public function getImplicitFilters($entityClass, Caller $caller = NULL)
 	{
-		return new ImplicitFilters(function (Fluent $statement) {
+		return new ImplicitFilters(function (Fluent $statement) use ($entityClass) {
+			$entityClass === 'Book' && $statement->join('test')->on('[book].[id] = [test].[book_id]');
 			$statement->where(FILTER);
 		});
 	}
@@ -70,6 +71,7 @@ getQuery()
 	->applyQuery($fluent, $mapper);
 
 $expected = getFluent('book')
+	->join('test')->on('[book].[id] = [test].[book_id]')
 	->leftJoin(getFluent('author')
 		->where(FILTER), '[author]')
 	->on('[book].[author_id] = [author].[id]')

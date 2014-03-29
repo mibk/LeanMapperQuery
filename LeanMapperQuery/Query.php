@@ -376,21 +376,23 @@ class Query implements IQuery
 	public function applyQuery(Fluent $fluent, IMapper $mapper)
 	{
 		// NOTE:
-		// $fluent is expected to have once called method Fluent::from
+		// $fluent is expected to have called method Fluent::from
 		// with pure table name as an argument. For example:
 		//   $fluent->from('author');
 		//
-		// Multiple calling Fluent::from method or something like
+		// So something like
 		//   $fluent->from('[author]');
-		// is not supported.
+		// is not supported. If a Fluent::from method is called multiple
+		// times, the table name from the first call is used as
+		// the source table.
 		//
 		// The advantage of this way is that there is no need to explicitly
 		// specify $tableName when calling Query::applyQuery anymore.
 		$fromClause = $fluent->_export('FROM');
-		if (count($fromClause) !== 3 || $fromClause[1] !== '%n') {
-			throw new InvalidArgumentException('Unsupported fluent from clause. Only one calling of \\LeanMapper\\Fluent::from method with pure table name as an argument is supported.');
+		if (count($fromClause) < 3 || $fromClause[1] !== '%n') {
+			throw new InvalidArgumentException('Unsupported fluent from clause. Only pure table name as an argument of \\LeanMapper\\Fluent::from method is supported.');
 		}
-		list(, , $this->sourceTableName) = $fromClause;
+		$this->sourceTableName = $fromClause[2];
 		$this->fluent = $fluent;
 		$this->mapper = $mapper;
 		// Add source table name to tables aliases list to avoid error

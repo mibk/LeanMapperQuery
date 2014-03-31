@@ -70,11 +70,16 @@ getQuery()
 	->where('@author', 2)
 	->applyQuery($fluent, $mapper);
 
-$expected = getFluent('book')
-	->join('test')->on('[book].[id] = [test].[book_id]')
-	->leftJoin(getFluent('author')
-		->where(FILTER), '[author]')
+$expected = new Fluent($connection);
+$expected->select('*')->from(
+		getFluent('book')
+			->join('test')->on('[book].[id] = [test].[book_id]')
+			->where(FILTER)
+		, 'book')
+	->leftJoin(
+		getFluent('author')
+			->where(FILTER)
+		, '[author]')
 	->on('[book].[author_id] = [author].[id]')
-	->where(FILTER)
 	->where('([author].[id] = 2)');
 Assert::same((string) $expected, (string) $fluent);

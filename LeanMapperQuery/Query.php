@@ -393,6 +393,17 @@ class Query implements IQuery
 			throw new InvalidArgumentException('Unsupported fluent from clause. Only pure table name as an argument of \\LeanMapper\\Fluent::from method is supported.');
 		}
 		$this->sourceTableName = $fromClause[2];
+		if (count($fromClause) > 3) { // complicated from clause
+			$subFluent = clone $fluent;
+			// Reset fluent.
+			foreach (array_keys(\DibiFluent::$separators) as $separator) {
+				$fluent->removeClause($separator);
+			}
+			// If there are some joins, enwrap the original fluent to enable
+			// accessing columns from joined tables.
+			$fluent->select('*')->from($subFluent, $this->sourceTableName);
+		}
+
 		$this->fluent = $fluent;
 		$this->mapper = $mapper;
 		// Add source table name to tables aliases list to avoid error

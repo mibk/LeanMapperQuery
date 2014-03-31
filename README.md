@@ -1,7 +1,7 @@
 Lean Mapper Query
 =================
 
-Lean Mapper Query is a concept of a *query object* for [Lean Mapper library](https://github.com/Tharos/LeanMapper) which helps to build complex queries using automatic joins (*idea taken from [NotORM library](http://www.notorm.com/)*). Look at the [suggested base classes](https://gist.github.com/mbohuslavek/9410266).
+Lean Mapper Query is a concept of a *query object* for [Lean Mapper library](https://github.com/Tharos/LeanMapper) which helps to build complex queries using automatic joins (*idea taken from [NotORM library](http://www.notorm.com/)*). Look at the [suggested base classes](https://gist.github.com/mbohuslavek/9410266). For Czech documentation have a look at the [wiki](https://github.com/mbohuslavek/LeanMapperQuery/wiki).
 
 Features
 --------

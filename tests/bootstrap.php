@@ -43,3 +43,8 @@ function getQuery()
 {
 	return new Query;
 }
+
+function id($instance)
+{
+	return $instance;
+}

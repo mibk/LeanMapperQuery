@@ -62,8 +62,8 @@ class Query implements IQuery
 	/** @var string */
 	protected $sourceTableName;
 
-	/** @var Fluent */
-	protected $fluent;
+	/** @var Fluent|NULL */
+	private $fluent = NULL;
 
 	/** @var IMapper */
 	protected $mapper;
@@ -277,6 +277,16 @@ class Query implements IQuery
 		}
 	}
 
+	/**
+	 * Parses given statement. Basically it replaces '@foo' to
+	 * '[table_name].[foo]' and performs automatic joins.
+	 * @param  string $statement
+	 * @param  bool   $replacePlaceholders
+	 * @return string
+	 * @throws InvalidArgumentException
+	 * @throws MemberAccessException
+	 * @throws InvalidStateException
+	 */
 	protected function parseStatement($statement, $replacePlaceholders = FALSE)
 	{
 		if (!is_string($statement)) {
@@ -368,10 +378,25 @@ class Query implements IQuery
 		return $output;
 	}
 
+	/**
+	 * Returns fluent if it is available. It is supposed
+	 * to be used within own command<name> methods.
+	 * @throws InvalidStateException
+	 * @return Fluent
+	 */
+	protected function getFluent()
+	{
+		if ($this->fluent === NULL) {
+			throw new InvalidStateException('getFluent() method could be only called within command<name>() methods.');
+		}
+		return $this->fluent;
+	}
+
 	////////////////////////////////////////////////////
 
 	/**
 	 * @inheritdoc
+	 * @throws InvalidArgumentException
 	 */
 	public function applyQuery(Fluent $fluent, IMapper $mapper)
 	{
@@ -414,6 +439,8 @@ class Query implements IQuery
 			list($method, $args) = $call;
 			call_user_func_array(array($this, $method), $args);
 		}
+		// Reset fluent.
+		$this->fluent = NULL;
 		return $fluent;
 	}
 
@@ -422,6 +449,7 @@ class Query implements IQuery
 	 * @param  string $name Command name
 	 * @param  array  $args
 	 * @return self
+	 * @throws NonExistingMethodException
 	 */
 	public function __call($name, array $args)
 	{

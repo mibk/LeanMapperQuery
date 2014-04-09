@@ -68,6 +68,12 @@ class Query implements IQuery
 	/** @var IMapper */
 	protected $mapper;
 
+	/**
+	 * Whether to use dumb replacing of placeholders globally.
+	 * @var boolean
+	 */
+	protected $replacePlaceholders = FALSE;
+
 
 	/** @var array */
 	private $queue = array();
@@ -287,11 +293,13 @@ class Query implements IQuery
 	 * @throws MemberAccessException
 	 * @throws InvalidStateException
 	 */
-	protected function parseStatement($statement, $replacePlaceholders = FALSE)
+	protected function parseStatement($statement, $replacePlaceholders = NULL)
 	{
 		if (!is_string($statement)) {
 			throw new InvalidArgumentException('Type of argument $statement is expected to be string. ' . gettype($statement) . ' given.');
 		}
+		$replacePlaceholders === NULL && $replacePlaceholders = (bool) $this->replacePlaceholders;
+
 		$rootTableName = $this->sourceTableName;
 		list($rootEntityClass, $rootProperties) = $this->getPropertiesByTable($rootTableName);
 
@@ -361,7 +369,7 @@ class Query implements IQuery
 				if ($property === NULL) {
 					$output .= $ch;
 				} else {
-					// Dumb replacing placeholder.
+					// Dumb replacing of the placeholder.
 					// NOTE: Placeholders are replaced by the type of last found property.
 					// 	It is stupid as it doesn't work for all kinds of SQL statements.
 					$output .= $this->replacePlaceholder($property);
@@ -477,7 +485,7 @@ class Query implements IQuery
 				}
 			}
 		} else {
-			$replacePlaceholders = FALSE;
+			$replacePlaceholders = NULL;
 			$args = func_get_args();
 			$operators = array('=', '<>', '!=', '<=>', '<', '<=', '>', '>=');
 			$variablePattern = self::$variablePatternFirstLetter . self::$variablePatternOtherLetters . '*';

@@ -1,22 +1,22 @@
 {
-    "name": "mbohuslavek/leanmapper-query",
-    "description": "Concept of Query Object for LeanMapper",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Michal Bohuslávek",
-            "email": "mbohuslavek@gmail.com"
-        }
-    ],
-    "autoload": {
-        "psr-0": {
-            "LeanMapperQuery": ""
-        }
-    },
-    "require": {
-        "tharos/leanmapper": "2.1.*"
-    },
-    "require-dev": {
-        "nette/tester": "0.9.3"
-    }
+	"name": "mbohuslavek/leanmapper-query",
+	"description": "Concept of Query Object for LeanMapper",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Michal Bohuslávek",
+			"email": "mbohuslavek@gmail.com"
+		}
+	],
+	"autoload": {
+		"psr-0": {
+			"LeanMapperQuery": ""
+		}
+	},
+	"require": {
+		"tharos/leanmapper": ">=2.1"
+	},
+	"require-dev": {
+		"nette/tester": "~1.2"
+	}
 }

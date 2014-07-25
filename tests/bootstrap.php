@@ -14,11 +14,6 @@ if (@!include __DIR__ . '/../vendor/autoload.php') {
 Tester\Environment::setup();
 date_default_timezone_set('Europe/Prague');
 
-if (extension_loaded('xdebug')) {
-	xdebug_disable();
-	Tester\CodeCoverage\Collector::start(__DIR__ . '/coverage.dat');
-}
-
 class TestMapper extends DefaultMapper
 {
 	protected $defaultEntityNamespace = NULL;

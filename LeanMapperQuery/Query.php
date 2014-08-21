@@ -494,11 +494,12 @@ class Query implements IQuery
 				$replacePlaceholders = TRUE;
 				$field = &$args[0];
 				list(, $field, $operator) = $matches;
-				$value = $args[1];
+				$value = &$args[1];
 
 				$placeholder = self::$defaultPlaceholder;
 				if (!$operator) {
 					if (is_array($value)) {
+						$value = $this->replaceEntitiesForItsPrimaryKeyValues($value);
 						$operator = 'IN';
 						$placeholder = '%in';
 					} elseif ($value === NULL) {
@@ -516,16 +517,22 @@ class Query implements IQuery
 			$statement = &$args[0];
 			$statement = $this->parseStatement($statement, $replacePlaceholders);
 			$statement = "($statement)";
-			// Replace instances of Entity for its values.
-			foreach ($args as &$arg) {
-				if ($arg instanceof LeanMapper\Entity) {
-					$entityTable = $this->mapper->getTable(get_class($arg));
-					$idField = $this->mapper->getEntityField($entityTable, $this->mapper->getPrimaryKey($entityTable));
-					$arg = $arg->$idField;
-				}
-			}
+			$args = $this->replaceEntitiesForItsPrimaryKeyValues($args);
 			call_user_func_array(array($this->fluent, 'where'),	$args);
 		}
+	}
+
+	private function replaceEntitiesForItsPrimaryKeyValues(array $entities)
+	{
+		foreach ($entities as &$entity) {
+			if ($entity instanceof LeanMapper\Entity) {
+				$entityTable = $this->mapper->getTable(get_class($entity));
+				// FIXME: Column name could be specified in the entity instead of mapper provided by 'getEntityField' function.
+				$idField = $this->mapper->getEntityField($entityTable, $this->mapper->getPrimaryKey($entityTable));
+				$entity = $entity->$idField;
+			}
+		}
+		return $entities;
 	}
 
 	private function commandOrderBy($field)

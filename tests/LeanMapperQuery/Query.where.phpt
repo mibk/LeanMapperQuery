@@ -5,6 +5,7 @@
  * @author Michal Bohuslávek
  */
 
+use LeanMapper;
 use LeanMapper\Entity;
 use Tester\Assert;
 
@@ -123,5 +124,28 @@ getQuery()
 
 $expected = getFluent('book')
 	->where('([book_tag].[tag_id] = %i)', 2);
+
+Assert::same($expected->_export('WHERE'), $fluent->_export('WHERE'));
+
+////////////////
+
+class TagRepository extends LeanMapper\Repository
+{
+	public function findAll()
+	{
+		return $this->createEntities($this->createFluent()->fetchAll());
+	}
+}
+
+$tagRepository = new TagRepository($connection, $mapper, $entityFactory);
+$tags = $tagRepository->findAll();
+
+$fluent = getFluent('book');
+getQuery()
+	->where('@tags', $tags)
+	->applyQuery($fluent, $mapper);
+
+$expected = getFluent('book')
+	->where('([book_tag].[tag_id] IN %in)', array(1 => 1, 2));
 
 Assert::same($expected->_export('WHERE'), $fluent->_export('WHERE'));

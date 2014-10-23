@@ -334,9 +334,17 @@ class Query implements IQuery
 							// NOTE: Traversing to a related entity is necessary even for the HasOne and HasMany
 							//  relationships if there are implicit filters to be applied.
 							$this->triggerJoin();
-							list(, $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
+							list($entityClass, $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
 							$column = $this->mapper->getPrimaryKey($tableName);
-							$property = $properties[$column];
+							$property = NULL;
+							foreach ($properties as $prop) {
+								if ($prop->getColumn() === $column) {
+									$property = $prop;
+								}
+							}
+							if (!$property) {
+								throw new InvalidStateException("Entity '$entityClass' doesn't have any field corresponding to the primary key column '$column'.");
+							}
 						} else {
 							$column = $property->getColumn();
 							if ($column === NULL) {

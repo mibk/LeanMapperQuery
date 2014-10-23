@@ -32,10 +32,10 @@ class TestQuery extends Query
 }
 
 /**
- * @property int $id
- * @property string $name
+ * @property int         $id
+ * @property string      $name
  * @property string|NULL $website
- * @property bool $available
+ * @property bool        $available
  */
 class Book extends Entity
 {

@@ -28,24 +28,24 @@ class FilterMapper extends TestMapper
 }
 
 /**
- * @property int $id
- * @property Author $author m:hasOne
- * @property Author|NULL $reviewer m:hasOne(reviewer_id)
- * @property string $pubdate
- * @property string $name
+ * @property int         $id
+ * @property Author      $author      m:hasOne
+ * @property Author|NULL $reviewer    m:hasOne(reviewer_id)
+ * @property string      $pubdate
+ * @property string      $name
  * @property string|NULL $description
  * @property string|NULL $website
- * @property bool $available
+ * @property bool        $available
  */
 class Book extends Entity
 {
 }
 
 /**
- * @property int $id
- * @property string $name
- * @property Book[] $books m:belongsToMany
- * @property Book[] $reviewedBooks m:belongsToMany(reviewer_id)
+ * @property int         $id
+ * @property string      $name
+ * @property Book[]      $books         m:belongsToMany
+ * @property Book[]      $reviewedBooks m:belongsToMany(reviewer_id)
  * @property string|NULL $web
  */
 class Author extends Entity

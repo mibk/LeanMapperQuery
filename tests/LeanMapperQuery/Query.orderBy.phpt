@@ -11,25 +11,24 @@ use Tester\Assert;
 require_once __DIR__ . '/../bootstrap.php';
 
 /**
- * @property int $id
- * @property Author $author m:hasOne
- * @property string $name
+ * @property int         $id
+ * @property Author      $author    m:hasOne
+ * @property string      $name
  * @property string|NULL $website
- * @property bool $available
+ * @property bool        $available
  */
 class Book extends Entity
 {
 }
 
 /**
- * @property int $id
- * @property string $name
+ * @property int         $id
+ * @property string      $name
  * @property string|NULL $web
  */
 class Author extends Entity
 {
 }
-
 
 $fluent = getFluent('book');
 getQuery()

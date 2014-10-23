@@ -37,7 +37,7 @@ class AuthorRepository extends BaseRepository
 }
 
 /**
- * @property int $id
+ * @property int    $id
  * @property string $name
  */
 class Tag extends BaseEntity
@@ -45,25 +45,25 @@ class Tag extends BaseEntity
 }
 
 /**
- * @property int $id
- * @property Author $author m:hasOne
- * @property Author|NULL $reviewer m:hasOne(reviewer_id)
- * @property Tag[] $tags m:hasMany
- * @property string $pubdate
- * @property string $name
+ * @property int         $id
+ * @property Author      $author      m:hasOne
+ * @property Author|NULL $reviewer    m:hasOne(reviewer_id)
+ * @property Tag[]       $tags        m:hasMany
+ * @property string      $pubdate
+ * @property string      $name
  * @property string|NULL $description
  * @property string|NULL $website
- * @property bool $available
+ * @property bool        $available
  */
 class Book extends BaseEntity
 {
 }
 
 /**
- * @property int $id
- * @property string $name
- * @property Book[] $books m:belongsToMany
- * @property Book[] $reviewedBooks m:belongsToMany(reviewer_id)
+ * @property int         $id
+ * @property string      $name
+ * @property Book[]      $books         m:belongsToMany
+ * @property Book[]      $reviewedBooks m:belongsToMany(reviewer_id)
  * @property string|NULL $web
  */
 class Author extends BaseEntity
@@ -88,7 +88,6 @@ $bookTags = $book->find('tags', getQuery()
 
 Assert::same(1, count($bookTags));
 
-
 $authorRepository = new AuthorRepository($connection, $mapper, $entityFactory);
 $authors = $authorRepository->findAll();
 $author = $authors[1];
@@ -98,7 +97,6 @@ $authorBooks = $author->find('books', getQuery()
 );
 
 Assert::same(0, count($authorBooks));
-
 
 // exceptions
 $book = $books[2];

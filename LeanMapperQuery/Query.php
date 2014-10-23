@@ -10,8 +10,8 @@ namespace LeanMapperQuery;
 
 use LeanMapper;
 use LeanMapper\Fluent;
-use LeanMapper\ImplicitFilters;
 use LeanMapper\IMapper;
+use LeanMapper\ImplicitFilters;
 use LeanMapper\Reflection\Property;
 use LeanMapper\Relationship;
 use LeanMapperQuery\Exception\InvalidArgumentException;
@@ -74,7 +74,6 @@ class Query implements IQuery
 	 */
 	protected $replacePlaceholders = FALSE;
 
-
 	/** @var array */
 	private $queue = array();
 
@@ -86,7 +85,6 @@ class Query implements IQuery
 
 	/** @var array */
 	private $joinAlternative = array();
-
 
 	private function getPropertiesByTable($tableName)
 	{
@@ -331,8 +329,7 @@ class Query implements IQuery
 						list($entityClass, $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
 						$propertyName = '';
 					} else {
-						if ($property->hasRelationship())
-						{
+						if ($property->hasRelationship()) {
 							// If the last property also has relationship replace with primary key field value.
 							// NOTE: Traversing to a related entity is necessary even for the HasOne and HasMany
 							//  relationships if there are implicit filters to be applied.
@@ -404,7 +401,7 @@ class Query implements IQuery
 
 	/**
 	 * @inheritdoc
-	 * @throws InvalidArgumentException
+	 * @throws     InvalidArgumentException
 	 */
 	public function applyQuery(Fluent $fluent, IMapper $mapper)
 	{

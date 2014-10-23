@@ -14,12 +14,12 @@ use LeanMapper\Fluent;
 use LeanMapper\Reflection\Property;
 use LeanMapper\Relationship;
 use LeanMapperQuery\Caller;
-use LeanMapperQuery\IQuery;
 use LeanMapperQuery\Exception\InvalidArgumentException;
 use LeanMapperQuery\Exception\InvalidMethodCallException;
 use LeanMapperQuery\Exception\InvalidRelationshipException;
 use LeanMapperQuery\Exception\InvalidStateException;
 use LeanMapperQuery\Exception\MemberAccessException;
+use LeanMapperQuery\IQuery;
 
 /**
  * @author Michal Bohuslávek
@@ -28,7 +28,6 @@ class Entity extends LeanMapper\Entity
 {
 	/** @var array */
 	protected static $magicMethodsPrefixes = array();
-
 
 	protected function queryProperty($field, IQuery $query)
 	{

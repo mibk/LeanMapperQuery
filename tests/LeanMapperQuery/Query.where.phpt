@@ -16,20 +16,20 @@ class OtherDateTime extends DateTime
 }
 
 /**
- * @property int $id
- * @property Tag[] $tags m:hasMany
- * @property DateTime $pubdate m:type(date)
+ * @property int           $id
+ * @property Tag[]         $tags      m:hasMany
+ * @property DateTime      $pubdate   m:type(date)
  * @property OtherDateTime $created
- * @property string $name
- * @property string|NULL $website
- * @property bool $available
+ * @property string        $name
+ * @property string|NULL   $website
+ * @property bool          $available
  */
 class Book extends Entity
 {
 }
 
 /**
- * @property int $id
+ * @property int    $id
  * @property string $name
  */
 class Tag extends Entity
@@ -110,7 +110,6 @@ $expected = getFluent('book')
 	->where('([book].[available] = %b)', FALSE);
 
 Assert::same($expected->_export(), $fluent->_export());
-
 
 // Test replacing instances of entities
 $tag = new Tag;

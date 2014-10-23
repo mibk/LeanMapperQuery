@@ -11,7 +11,7 @@ use Tester\Assert;
 require_once __DIR__ . '/../bootstrap.php';
 
 /**
- * @property int $id
+ * @property int    $id
  * @property string $name
  */
 class Tag extends Entity
@@ -19,31 +19,30 @@ class Tag extends Entity
 }
 
 /**
- * @property int $id
- * @property Author $author m:hasOne
- * @property Author|NULL $reviewer m:hasOne(reviewer_id)
- * @property Tag[] $tags m:hasMany
- * @property string $pubdate
- * @property string $name
+ * @property int         $id
+ * @property Author      $author      m:hasOne
+ * @property Author|NULL $reviewer    m:hasOne(reviewer_id)
+ * @property Tag[]       $tags        m:hasMany
+ * @property string      $pubdate
+ * @property string      $name
  * @property string|NULL $description
  * @property string|NULL $website
- * @property bool $available
+ * @property bool        $available
  */
 class Book extends Entity
 {
 }
 
 /**
- * @property int $id
- * @property string $name
- * @property Book[] $books m:belongsToMany
- * @property Book[] $reviewedBooks m:belongsToMany(reviewer_id)
+ * @property int         $id
+ * @property string      $name
+ * @property Book[]      $books         m:belongsToMany
+ * @property Book[]      $reviewedBooks m:belongsToMany(reviewer_id)
  * @property string|NULL $web
  */
 class Author extends Entity
 {
 }
-
 
 //////// Basic joins ////////
 
@@ -81,7 +80,6 @@ $expected = getFluent('book')
 	->where("([tag].[name] <> 'php')");
 Assert::same((string) $expected, (string) $fluent);
 
-
 //////// Multiple join of the same table ////////
 
 $fluent = getFluent('book');
@@ -94,7 +92,6 @@ $expected = getFluent('book')
 	->where("([author].[name] = 'Karel')")
 	->where("([author_reviewer_id].[web] = 'http://leanmapper.com')");
 Assert::same((string) $expected, (string) $fluent);
-
 
 //////// Optional specifying of primary key ////////
 

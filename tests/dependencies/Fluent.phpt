@@ -32,7 +32,6 @@ $expected = array(
 
 Assert::equal($fluent->_export('FROM'), $expected);
 
-
 // Test generated fluent by entity traversing
 
 /**

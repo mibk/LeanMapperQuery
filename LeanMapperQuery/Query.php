@@ -19,6 +19,7 @@ use LeanMapperQuery\Exception\InvalidRelationshipException;
 use LeanMapperQuery\Exception\InvalidStateException;
 use LeanMapperQuery\Exception\MemberAccessException;
 use LeanMapperQuery\Exception\NonExistingMethodException;
+use LeanMapperQuery\Exception\NotImplementedException;
 
 /**
  * @author Michal Bohuslávek
@@ -30,7 +31,7 @@ use LeanMapperQuery\Exception\NonExistingMethodException;
  * @method Query limit(int $limit)
  * @method Query offset(int $offset)
  */
-class Query implements IQuery
+class Query implements IQuery, \Iterator
 {
 	/** @var string */
 	private static $defaultPlaceholder = '?';
@@ -574,6 +575,33 @@ class Query implements IQuery
 	private function commandOffset($offset)
 	{
 		$this->fluent->offset($offset);
+	}
+
+	//////////////////// Iterator //////////////////////
+
+	public function current()
+	{
+		throw new NotImplementedException("Query object is not iterable.");
+	}
+
+	public function next()
+	{
+		throw new NotImplementedException("Query object is not iterable.");
+	}
+
+	public function rewind()
+	{
+		throw new NotImplementedException("Query object is not iterable.");
+	}
+
+	public function key()
+	{
+		throw new NotImplementedException("Query object is not iterable.");
+	}
+
+	public function valid()
+	{
+		throw new NotImplementedException("Query object is not iterable.");
 	}
 
 }

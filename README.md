@@ -1,14 +1,18 @@
 Lean Mapper Query
 =================
 
-Lean Mapper Query is a concept of a *query object* for [Lean Mapper library](https://github.com/Tharos/LeanMapper) which helps to build complex queries using automatic joins (*idea taken from [NotORM library](http://www.notorm.com/)*). Look at the [suggested base classes](https://gist.github.com/mibk/9410266). For Czech documentation have a look at the [wiki](https://github.com/mibk/LeanMapperQuery/wiki).
+Lean Mapper Query is a concept of a *query object* for
+[Lean Mapper library](https://github.com/Tharos/LeanMapper) which helps to build complex
+queries using automatic joins (*idea taken from [NotORM library](http://www.notorm.com/)*).
+Look at the [suggested base classes](https://gist.github.com/mibk/9410266). For Czech
+documentation have a look at the [wiki](https://github.com/mibk/LeanMapperQuery/wiki).
 
 Features
 --------
 
-- it behaves as an `SQL` preprocessor, hence most SQL expressions are available
-- automatic joins using *dot notation* (`@book.tags.name`)
-- ability to query both repositories or entities
+- behaves as a `SQL` preprocessor, hence most SQL expressions are available
+- automatic joins using the *dot notation* (`@book.tags.name`)
+- ability to query repositories or entities
 - support for implicit filters
 
 
@@ -25,7 +29,7 @@ composer require mbohuslavek/leanmapper-query:@dev
 What does it do?
 ----------------
 
-Suppose we have following repositories:
+Suppose we have the following repositories:
 
 ```php
 class BaseRepository extends LeanMapper\Repository
@@ -44,11 +48,11 @@ class BookRepository extends BaseRepository
 }
 ```
 
-and following entities:
+and the following entities:
 
 ```php
 /**
- * @property int $id
+ * @property int    $id
  * @property string $name
  */
 class Tag extends LeanMapper\Entity
@@ -56,19 +60,19 @@ class Tag extends LeanMapper\Entity
 }
 
 /**
- * @property int $id
- * @property Author $author m:hasOne
- * @property Tag[] $tags m:hasMany
+ * @property int      $id
+ * @property Author   $author m:hasOne
+ * @property Tag[]    $tags m:hasMany
  * @property DateTime $pubdate
- * @property string $name
- * @property bool $available
+ * @property string   $name
+ * @property bool     $available
  */
 class Book extends LeanMapper\Entity
 {
 }
 
 /**
- * @property int $id
+ * @property int    $id
  * @property string $name
  * @property Book[] $books m:belongsToMany
  */
@@ -91,7 +95,8 @@ $bookRepository = new BookRepository(...);
 $books = $bookRepository->find($query);
 ```
 
-Database query will look like this:
+The database query will look like this:
+
 ```sql
 SELECT [book].*
 FROM [book]
@@ -99,15 +104,18 @@ LEFT JOIN [author] ON [book].[author_id] = [author].[id]
 WHERE ([author].[name] = 'Karel')
 ```
 
-You can see it performs automatic joins via *dot notation*. It supports all types of relationships which are known to **Lean Mapper**.
+You can see it performs automatic joins via the *dot notation*. It supports all relationship
+types known to **Lean Mapper**.
 
 It is very easy to use SQL functions. We can update query like this:
+
 ```php
 $query->where('DATE(@pubdate) > %d', '1998-01-01');
 $books = $bookRepository->find($query);
 ```
 
-and change the database query into following:
+which changes the database query into the following:
+
 ```sql
 SELECT [book].*
 FROM [book]
@@ -118,7 +126,7 @@ WHERE ([author].[name] = 'Karel') AND (DATE([book].[pubdate]) > '1998-01-01')
 Don't repeat yourself
 ---------------------
 
-You can extend `Query` and define own methods.
+You can extend the `Query` class and define your own methods.
 
 ```php
 class BookQuery extends LeanMapperQuery\Query
@@ -141,7 +149,8 @@ $books = $this->bookRepository->find($query);
 Querying entities
 -----------------
 
-It is also possible to query an entity property (*currently only those properties with `BelongsToMany` or `HasMany` relationships*). Let's build `BaseEntity`:
+It is also possible to query an entity property (*currently only those properties with
+`BelongsToMany` or `HasMany` relationships*). Let's make the `BaseEntity` class:
 
 ```php
 class BaseEntity extends LeanMapperQuery\Entity
@@ -163,9 +172,10 @@ class Book extends BaseEntity
 }
 ```
 
-*Note that `BaseEntity` extends `LeanMapperQuery\Entity` to make the following possible.*
+*Note that `BaseEntity` must extend `LeanMapperQuery\Entity` to make the following possible.*
 
-We have defined the `find` method as `protected` because with specifying the method name in `$magicMethodsPrefixes` property you can query entities like this:
+We have defined the `find` method as `protected` because by specifying the method name in the
+`$magicMethodsPrefixes` property, you can query entities like this:
 
 ```php
 $book; // previously fetched instance of an entity from a repository
@@ -174,7 +184,8 @@ $query->where('@name !=', 'ebook');
 $tags = $book->findTags($query);
 ```
 
-*The magic method `findTags` will eventually call your protected method `find` with 'tags' as the 1 argument.*
+*The magic method `findTags` will eventually call your protected method `find` with 'tags' as
+the 1st argument.*
 
 The resulting database query looks like this:
 
@@ -184,13 +195,16 @@ FROM [tag]
 WHERE [tag].[id] IN (1, 2) AND ([tag].[name] != 'ebook')
 ```
 
-The first condition in where clause `[tag].[id] IN (1, 2)` is taken from the entity traversing (*tags are queried against this particular book entity's own tags*).
+The first condition in the `where` clause, `[tag].[id] IN (1, 2)`, is taken from the entity
+traversing (*tags are queried against this particular book entity's own tags*).
 
 
 What else you can do?
 ---------------------
 
-If we slightly modify our `BaseRepository` and `BaseEntity` we can simplify working with query objects. *To achieve this look at the [suggested base classes](https://gist.github.com/mbohuslavek/9410266)*. It makes the following possible.
+If we slightly modify `BaseRepository` and `BaseEntity`, we can simplify working with query objects.
+*To achieve this look at the [suggested base classes](https://gist.github.com/mibk/9410266)*. It makes
+the following possible.
 
 ```php
 $books = $bookRepository->query()

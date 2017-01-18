@@ -59,11 +59,29 @@ class Entity extends LeanMapper\Entity
 			$sourceReferencingColumn = $relationship->getColumnReferencingSourceTable();
 			$targetReferencingColumn = $relationship->getColumnReferencingTargetTable();
 			$targetTable = $relationship->getTargetTable();
+			$targetPrimaryKey = $mapper->getPrimaryKey($targetTable);
 			$rows = array();
+			$resultRows = array();
+			$targetResultProxy = NULL;
+
 			foreach ($this->row->referencing($relationshipTable, $sourceReferencingColumn) as $relationship) {
 				$row = $relationship->referenced($targetTable, $targetReferencingColumn, new Filtering($filters));
-				$row !== NULL && $rows[] = $row;
+				if ($row !== NULL && $targetResultProxy === NULL) {
+					$targetResultProxy = $row->getResultProxy();
+				}
+				$row !== NULL && $resultRows[$row->{$targetPrimaryKey}] = $row;
 			}
+
+			if ($targetResultProxy) {
+				foreach ($targetResultProxy as $rowId => $rowData) {
+					if (isset($resultRows[$rowId])) {
+						$rows[] = $resultRows[$rowId];
+					}
+				}
+			} else {
+				$rows = $resultRows;
+			}
+
 		} else {
 			throw new InvalidRelationshipException('Only BelongsToMany and HasMany relationships are supported when querying entity property. ' . get_class($relationship) . ' given.');
 		}

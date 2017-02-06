@@ -25,6 +25,7 @@ use LeanMapperQuery\Exception\NonExistingMethodException;
  *
  * @method Query where($cond)
  * @method Query orderBy($field)
+ * @method Query groupBy($field)
  * @method Query asc(bool $asc = TRUE)
  * @method Query desc(bool $desc = TRUE)
  * @method Query limit(int $limit)
@@ -554,6 +555,12 @@ class Query implements IQuery
 			$field = $this->parseStatement($field);
 			$this->fluent->orderBy($field);
 		}
+	}
+
+	private function commandGroupBy($field)
+	{
+		$field = $this->parseStatement($field);
+		$this->fluent->groupBy($field);
 	}
 
 	private function commandAsc($asc = TRUE)

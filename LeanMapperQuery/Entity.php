@@ -13,11 +13,13 @@ use LeanMapper\Filtering;
 use LeanMapper\Fluent;
 use LeanMapper\Reflection\Property;
 use LeanMapper\Relationship;
+use LeanMapper\Result;
 use LeanMapperQuery\Caller;
 use LeanMapperQuery\Exception\InvalidArgumentException;
 use LeanMapperQuery\Exception\InvalidMethodCallException;
 use LeanMapperQuery\Exception\InvalidRelationshipException;
 use LeanMapperQuery\Exception\InvalidStateException;
+use LeanMapperQuery\Exception\InvalidStrategyException;
 use LeanMapperQuery\Exception\MemberAccessException;
 use LeanMapperQuery\IQuery;
 
@@ -52,7 +54,28 @@ class Entity extends LeanMapper\Entity
 		if ($relationship instanceof Relationship\BelongsToMany) {
 			$targetTable = $relationship->getTargetTable();
 			$referencingColumn = $relationship->getColumnReferencingSourceTable();
-			$rows = $this->row->referencing($targetTable, $referencingColumn, new Filtering($filters));
+			$strategy = $relationship->getStrategy();
+			$detectStrategy = $strategy !== Result::STRATEGY_UNION;
+
+			if ($detectStrategy) {
+				$filters[] = function (Fluent $fluent) {
+					if ($fluent->_export('LIMIT') || $fluent->_export('OFFSET')) {
+						throw new InvalidStrategyException('Fluent uses LIMIT or OFFSET, use UNION strategy.');
+					}
+				};
+			}
+
+			$rows = [];
+
+			try {
+				$rows = $this->row->referencing($targetTable, $referencingColumn, new Filtering($filters), $strategy);
+
+			} catch (InvalidStrategyException $e) {
+				if ($detectStrategy) {
+					array_pop($filters); // remove detector
+				}
+				$rows = $this->row->referencing($targetTable, $referencingColumn, new Filtering($filters), Result::STRATEGY_UNION);
+			}
 
 		} elseif ($relationship instanceof Relationship\HasMany) {
 			$relationshipTable = $relationship->getRelationshipTable();

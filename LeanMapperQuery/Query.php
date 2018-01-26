@@ -30,6 +30,7 @@ use LeanMapperQuery\Exception\NotImplementedException;
  * @method Query desc(bool $desc = TRUE)
  * @method Query limit(int $limit)
  * @method Query offset(int $offset)
+ * @method Query groupBy($field)
  */
 class Query implements IQuery, \Iterator
 {
@@ -575,6 +576,12 @@ class Query implements IQuery, \Iterator
 	private function commandOffset($offset)
 	{
 		$this->fluent->offset($offset);
+	}
+
+	protected function commandGroupBy($field)
+	{
+		$statement = $this->parseStatement($field);
+		$this->getFluent()->groupBy($statement);
 	}
 
 	//////////////////// Iterator //////////////////////

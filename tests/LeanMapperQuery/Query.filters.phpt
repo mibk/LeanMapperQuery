@@ -81,5 +81,6 @@ $expected->select('*')->from(
 			->where(FILTER)
 		, '[author]')
 	->on('[book].[author_id] = [author].[id]')
-	->where('([author].[id] = 2)');
+	->where('([author].[id] = 2)')
+	->groupBy('[book].[id]');
 Assert::same((string) $expected, (string) $fluent);

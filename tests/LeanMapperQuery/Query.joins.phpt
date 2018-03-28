@@ -79,7 +79,8 @@ $query->where('@author.name', 'Karel')
 
 $expected = getFluent('book')
 	->leftJoin('author')->on('[book].[author_id] = [author].[id_author]')
-	->where("([author].[name] = 'Karel')");
+	->where("([author].[name] = 'Karel')")
+	->groupBy('[book].[id]');
 Assert::same((string) $expected, (string) $fluent);
 
 // BelongsTo relationship
@@ -90,7 +91,8 @@ getQuery()
 
 $expected = getFluent('author')
 	->leftJoin('book')->on('[author].[id_author] = [book].[author_id]')
-	->where('([book].[available] = 1)');
+	->where('([book].[available] = 1)')
+	->groupBy('[author].[id_author]');
 Assert::same((string) $expected, (string) $fluent);
 
 // HasMany relationship
@@ -102,7 +104,8 @@ getQuery()
 $expected = getFluent('book')
 	->leftJoin('book_tag')->on('[book].[id] = [book_tag].[book_id]')
 	->leftJoin('tag')->on('[book_tag].[tag_id] = [tag].[id]')
-	->where("([tag].[name] <> 'php')");
+	->where("([tag].[name] <> 'php')")
+	->groupBy('[book].[id]');
 Assert::same((string) $expected, (string) $fluent);
 
 //////// Multiple join of the same table ////////
@@ -115,7 +118,8 @@ $expected = getFluent('book')
 	->leftJoin('author')->on('[book].[author_id] = [author].[id_author]')
 	->leftJoin('[author] [author_reviewer_id]')->on('[book].[reviewer_id] = [author_reviewer_id].[id_author]')
 	->where("([author].[name] = 'Karel')")
-	->where("([author_reviewer_id].[web] = 'http://leanmapper.com')");
+	->where("([author_reviewer_id].[web] = 'http://leanmapper.com')")
+	->groupBy('[book].[id]');
 Assert::same((string) $expected, (string) $fluent);
 
 //////// Optional specifying of primary key ////////
@@ -138,7 +142,8 @@ getQuery()
 
 $expected = getFluent('book')
 	->leftJoin('book_tag')->on('[book].[id] = [book_tag].[book_id]')
-	->where('([book_tag].[tag_id] = 2)');
+	->where('([book_tag].[tag_id] = 2)')
+	->groupBy('[book].[id]');
 Assert::same((string) $expected, (string) $fluent);
 
 // BelongsTo
@@ -149,7 +154,8 @@ getQuery()
 
 $expected = getFluent('author')
 	->leftJoin('book')->on('[author].[id_author] = [book].[author_id]')
-	->where('([book].[id] = 2)');
+	->where('([book].[id] = 2)')
+	->groupBy('[author].[id_author]');
 Assert::same((string) $expected, (string) $fluent);
 
 //////// Multiple joins ////////
@@ -164,7 +170,8 @@ $expected = getFluent('book')
 	->leftJoin('[book] [book_id_author]')->on('[author].[id_author] = [book_id_author].[author_id]')
 	->leftJoin('book_tag')->on('[book_id_author].[id] = [book_tag].[book_id]')
 	->leftJoin('tag')->on('[book_tag].[tag_id] = [tag].[id]')
-	->where("([tag].[name] = 'foo')");
+	->where("([tag].[name] = 'foo')")
+	->groupBy('[book].[id]');
 Assert::same((string) $expected, (string) $fluent);
 
 Assert::throws(function () use ($mapper){
@@ -182,5 +189,6 @@ getQuery()
 $expected = getFluent('book')
 	->leftJoin('book_tag')->on('[book].[id] = [book_tag].[book_id]')
 	->where('([book].[author_id] = 2)')
-	->where('([book_tag].[tag_id] = 2)');
+	->where('([book_tag].[tag_id] = 2)')
+	->groupBy('[book].[id]');
 Assert::same((string) $expected, (string) $fluent);

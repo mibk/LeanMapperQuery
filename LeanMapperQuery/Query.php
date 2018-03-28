@@ -150,6 +150,7 @@ class Query implements IQuery, \Iterator
 			list($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $globalKey, $alias) = $this->possibleJoin;
 			$this->fluent->leftJoin("[$targetTable]" . ($targetTable !== $alias ? " [$alias]" : ''))
 				->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
+			$this->tryAddGroupBy($this->fluent, $currentTable);
 			$this->registerTableAlias($globalKey, $alias);
 			$this->possibleJoin = NULL;
 		}
@@ -204,6 +205,7 @@ class Query implements IQuery, \Iterator
 				}
 				$this->fluent->leftJoin($subFluent, "[$alias]")
 					->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
+				$this->tryAddGroupBy($this->fluent, $currentTable);
 				$this->registerTableAlias($globalKey, $alias);
 			}
 		}
@@ -279,6 +281,15 @@ class Query implements IQuery, \Iterator
 			} else {
 				return self::$defaultPlaceholder;
 			}
+		}
+	}
+
+	private function tryAddGroupBy(Fluent $fluent, $table)
+	{
+		$groupBy = $fluent->_export('GROUP BY');
+
+		if (empty($groupBy)) {
+			$fluent->groupBy('%n.%n', $table, $this->mapper->getPrimaryKey($table));
 		}
 	}
 

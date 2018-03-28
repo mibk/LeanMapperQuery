@@ -7,11 +7,6 @@ php:
   - 7.1
   - 7.2
 
-matrix:
-  include:
-    - php: 5.3
-      dist: precise
-
 script:
   - vendor/bin/tester tests -s -p php
   - php temp/code-checker/src/code-checker.php

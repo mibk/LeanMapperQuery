@@ -14,8 +14,8 @@
 		}
 	},
 	"require": {
-		"php": ">=5.3.0",
-		"tharos/leanmapper": ">=2.3"
+		"php": ">=5.4.0",
+		"tharos/leanmapper": ">=3.0"
 	},
 	"require-dev": {
 		"nette/tester": "~1.2"

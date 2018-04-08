@@ -452,7 +452,8 @@ class Query implements IQuery, \Iterator
 			}
 			// If there are some joins, enwrap the original fluent to enable
 			// accessing columns from joined tables.
-			$fluent->select('*')->from($subFluent, $this->sourceTableName);
+			$fluent->select('*')->from($subFluent)
+				->as($this->sourceTableName);
 		}
 
 		$this->fluent = $fluent;

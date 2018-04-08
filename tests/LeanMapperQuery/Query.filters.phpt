@@ -75,7 +75,7 @@ $expected->select('*')->from(
 		getFluent('book')
 			->join('test')->on('[book].[id] = [test].[book_id]')
 			->where(FILTER)
-		, 'book')
+		)->as('book')
 	->leftJoin(
 		getFluent('author')
 			->where(FILTER)

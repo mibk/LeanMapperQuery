@@ -19,10 +19,10 @@ class TestMapper extends DefaultMapper
 	protected $defaultEntityNamespace = NULL;
 }
 
-$connection = new Connection(array(
+$connection = new Connection([
 				'driver' => 'sqlite3',
 				'database' => __DIR__ . '/db/library.sq3',
-));
+]);
 
 $mapper = new TestMapper;
 $entityFactory = new DefaultEntityFactory;

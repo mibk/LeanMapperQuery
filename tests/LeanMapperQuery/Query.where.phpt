@@ -75,7 +75,7 @@ $expected = getFluent('book')
 Assert::same($expected->_export(), $fluent->_export());
 
 $fluent = getFluent('book');
-$bookNames = array('PHP', 'Javascript');
+$bookNames = ['PHP', 'Javascript'];
 getQuery()
 	->where('@name', $bookNames)
 	->where('@website', NULL)
@@ -99,10 +99,10 @@ Assert::same($expected->_export(), $fluent->_export());
 
 $fluent = getFluent('book');
 getQuery()
-	->where(array(
+	->where([
 		'@name' => $bookNames,
 		'@available' => FALSE,
-	))
+	])
 	->applyQuery($fluent, $mapper);
 
 $expected = getFluent('book')
@@ -145,6 +145,6 @@ getQuery()
 	->applyQuery($fluent, $mapper);
 
 $expected = getFluent('book')
-	->where('([book_tag].[tag_id] IN %in)', array(1 => 1, 2));
+	->where('([book_tag].[tag_id] IN %in)', [1 => 1, 2]);
 
 Assert::same($expected->_export('WHERE'), $fluent->_export('WHERE'));

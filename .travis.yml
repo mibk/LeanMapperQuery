@@ -9,7 +9,7 @@ php:
 
 script:
   - vendor/bin/tester tests -s -p php
-  - php temp/code-checker/src/code-checker.php
+  - php temp/code-checker/src/code-checker.php --short-arrays
 
 after_failure:
   # Print *.actual content

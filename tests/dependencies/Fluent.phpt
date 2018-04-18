@@ -24,11 +24,11 @@ class TestRepository extends Repository
 // Test default generated fluent by repository
 $testRepository = new TestRepository($connection, $mapper, $entityFactory);
 $fluent = $testRepository->createFluent();
-$expected = array(
+$expected = [
 	'FROM',
 	'%n',
 	'test'
-);
+];
 
 Assert::equal($fluent->_export('FROM'), $expected);
 
@@ -42,11 +42,11 @@ class Book extends Entity
 	public function test()
 	{
 		$this->row->referencing('book_tag', 'book_id', new Filtering(function (Fluent $fluent) {
-			$expected = array(
+			$expected = [
 				'FROM',
 				'%n',
 				'book_tag'
-			);
+			];
 			Assert::equal($fluent->_export('FROM'), $expected);
 		}));
 	}

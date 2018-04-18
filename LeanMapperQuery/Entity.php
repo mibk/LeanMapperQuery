@@ -27,7 +27,7 @@ use LeanMapperQuery\IQuery;
 class Entity extends LeanMapper\Entity
 {
 	/** @var array */
-	protected static $magicMethodsPrefixes = array();
+	protected static $magicMethodsPrefixes = [];
 
 	protected function queryProperty($field, IQuery $query)
 	{
@@ -60,8 +60,8 @@ class Entity extends LeanMapper\Entity
 			$targetReferencingColumn = $relationship->getColumnReferencingTargetTable();
 			$targetTable = $relationship->getTargetTable();
 			$targetPrimaryKey = $mapper->getPrimaryKey($targetTable);
-			$rows = array();
-			$resultRows = array();
+			$rows = [];
+			$resultRows = [];
 			$targetResultProxy = NULL;
 
 			foreach ($this->row->referencing($relationshipTable, $sourceReferencingColumn) as $relationship) {
@@ -85,7 +85,7 @@ class Entity extends LeanMapper\Entity
 		} else {
 			throw new InvalidRelationshipException('Only BelongsToMany and HasMany relationships are supported when querying entity property. ' . get_class($relationship) . ' given.');
 		}
-		$entities = array();
+		$entities = [];
 		foreach ($rows as $row) {
 			$entity = $this->entityFactory->createEntity($class, $row);
 			$entity->makeAlive($this->entityFactory);

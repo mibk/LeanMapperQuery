@@ -49,14 +49,14 @@ class Query implements IQuery, \Iterator
 	 * Placeholders transformation table.
 	 * @var array
 	 */
-	private static $placeholders = array(
+	private static $placeholders = [
 		'string' => '%s',
 		'boolean' => '%b',
 		'integer' => '%i',
 		'float' => '%f',
 		'DateTime' => '%t',
 		'Date' => '%d',
-	);
+	];
 
 	////////////////////////////////////////////////////
 
@@ -76,7 +76,7 @@ class Query implements IQuery, \Iterator
 	protected $replacePlaceholders = FALSE;
 
 	/** @var array */
-	private $queue = array();
+	private $queue = [];
 
 	/** @var array */
 	private $tablesAliases;
@@ -85,17 +85,17 @@ class Query implements IQuery, \Iterator
 	private $possibleJoin = NULL;
 
 	/** @var array */
-	private $joinAlternative = array();
+	private $joinAlternative = [];
 
 	private function getPropertiesByTable($tableName)
 	{
 		$entityClass = $this->mapper->getEntityClass($tableName);
 		$reflection = $entityClass::getReflection($this->mapper);
-		$properties = array();
+		$properties = [];
 		foreach ($reflection->getEntityProperties() as $property) {
 			$properties[$property->getName()] = $property;
 		}
-		return array($entityClass, $properties);
+		return [$entityClass, $properties];
 	}
 
 	/**
@@ -141,7 +141,7 @@ class Query implements IQuery, \Iterator
 			throw new InvalidStateException('Cannot register new join. There is one registered already.');
 		}
 		$this->possibleJoin = func_get_args();
-		$this->joinAlternative = array($currentTable, $referencingColumn);
+		$this->joinAlternative = [$currentTable, $referencingColumn];
 	}
 
 	private function triggerJoin()
@@ -175,7 +175,7 @@ class Query implements IQuery, \Iterator
 		return $this->possibleJoin !== NULL;
 	}
 
-	private function joinRelatedTable($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $filters = array(), $joinImmediately = TRUE)
+	private function joinRelatedTable($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $filters = [], $joinImmediately = TRUE)
 	{
 		// Join if not already joined.
 		if (!$this->getTableAlias($currentTable, $targetTable, $referencingColumn, $globalKey, $alias)) {
@@ -191,17 +191,17 @@ class Query implements IQuery, \Iterator
 				$subFluent->select('%n.*', $targetTable)->from($targetTable);
 
 				// Apply implicit filters.
-				$targetedArgs = array();
+				$targetedArgs = [];
 				if ($filters instanceof ImplicitFilters) {
 					$targetedArgs = $filters->getTargetedArgs();
 					$filters = $filters->getFilters();
 				}
 				foreach ($filters as $filter) {
-					$args = array($filter);
+					$args = [$filter];
 					if (is_string($filter) && array_key_exists($filter, $targetedArgs)) {
 						$args = array_merge($args, $targetedArgs[$filter]);
 					}
-					call_user_func_array(array($subFluent, 'applyFilter'), $args);
+					call_user_func_array([$subFluent, 'applyFilter'], $args);
 				}
 				$this->fluent->leftJoin($subFluent, "[$alias]")
 					->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
@@ -218,7 +218,7 @@ class Query implements IQuery, \Iterator
 			$entityClass = $this->mapper->getEntityClass($currentTable);
 			throw new InvalidRelationshipException("Property '{$property->getName()}' in entity '$entityClass' doesn't have any relationship.");
 		}
-		$implicitFilters= array();
+		$implicitFilters= [];
 		$propertyType = $property->getType();
 		if (is_subclass_of($propertyType, 'LeanMapper\\Entity')) {
 			$caller = new Caller($this, $property);
@@ -313,11 +313,11 @@ class Query implements IQuery, \Iterator
 		$rootTableName = $this->sourceTableName;
 		list($rootEntityClass, $rootProperties) = $this->getPropertiesByTable($rootTableName);
 
-		$switches = array(
+		$switches = [
 			'@' => FALSE,
 			'"' => FALSE,
 			"'" => FALSE,
-		);
+		];
 		$output = '';
 		$property = NULL;
 		$firstLetter = TRUE;
@@ -459,11 +459,11 @@ class Query implements IQuery, \Iterator
 		$this->mapper = $mapper;
 		// Add source table name to tables aliases list to avoid error
 		// when joining to itself.
-		$this->tablesAliases = array($this->sourceTableName);
+		$this->tablesAliases = [$this->sourceTableName];
 
 		foreach ($this->queue as $call) {
 			list($method, $args) = $call;
-			call_user_func_array(array($this, $method), $args);
+			call_user_func_array([$this, $method], $args);
 		}
 		// Reset fluent.
 		$this->fluent = NULL;
@@ -483,7 +483,7 @@ class Query implements IQuery, \Iterator
 		if (!method_exists($this, $method)) {
 			throw new NonExistingMethodException("Command '$name' doesn't exist. To register this command there should be defined protected method " . get_called_class() . "::$method.");
 		}
-		$this->queue[] = array($method, $args);
+		$this->queue[] = [$method, $args];
 		return $this;
 	}
 
@@ -505,7 +505,7 @@ class Query implements IQuery, \Iterator
 		} else {
 			$replacePlaceholders = NULL;
 			$args = func_get_args();
-			$operators = array('=', '<>', '!=', '<=>', '<', '<=', '>', '>=');
+			$operators = ['=', '<>', '!=', '<=>', '<', '<=', '>', '>='];
 			$variablePattern = self::$variablePatternFirstLetter . self::$variablePatternOtherLetters . '*';
 			if (count($args) === 2
 				&& preg_match('#^\s*(@(?:'.$variablePattern.'|\.)*'.$variablePattern.')\s*(|'.implode('|', $operators).')\s*(?:\?\s*)?$#', $args[0], $matches)) {
@@ -536,7 +536,7 @@ class Query implements IQuery, \Iterator
 			$statement = $this->parseStatement($statement, $replacePlaceholders);
 			$statement = "($statement)";
 			$args = $this->replaceEntitiesForItsPrimaryKeyValues($args);
-			call_user_func_array(array($this->fluent, 'where'), $args);
+			call_user_func_array([$this->fluent, 'where'], $args);
 		}
 	}
 

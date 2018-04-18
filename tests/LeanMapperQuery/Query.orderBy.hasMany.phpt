@@ -54,10 +54,10 @@ $query = getQuery()
 	->orderBy('@name');
 
 $tags = $book->queryTags($query);
-$names = array();
+$names = [];
 
 foreach ($tags as $tag) {
 	$names[] = $tag->name;
 }
 
-Assert::same(array('ebook', 'popular'), $names);
+Assert::same(['ebook', 'popular'], $names);

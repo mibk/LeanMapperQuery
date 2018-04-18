@@ -68,7 +68,7 @@ class Book extends BaseEntity
  */
 class Author extends BaseEntity
 {
-	protected static $magicMethodsPrefixes = array('test', 'secondTest');
+	protected static $magicMethodsPrefixes = ['test', 'secondTest'];
 
 	protected function secondTest()
 	{

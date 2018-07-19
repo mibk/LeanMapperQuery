@@ -86,8 +86,9 @@ class Entity extends LeanMapper\Entity
 			throw new InvalidRelationshipException('Only BelongsToMany and HasMany relationships are supported when querying entity property. ' . get_class($relationship) . ' given.');
 		}
 		$entities = array();
+		$table = $mapper->getTable($class);
 		foreach ($rows as $row) {
-			$entity = $this->entityFactory->createEntity($class, $row);
+			$entity = $this->entityFactory->createEntity($mapper->getEntityClass($table, $row), $row);
 			$entity->makeAlive($this->entityFactory);
 			$entities[] = $entity;
 		}

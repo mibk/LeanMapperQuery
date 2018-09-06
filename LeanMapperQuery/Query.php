@@ -60,6 +60,9 @@ class Query implements IQuery, \Iterator
 
 	////////////////////////////////////////////////////
 
+	/** @var string|NULL */
+	private $castedEntityClass = NULL;
+
 	/** @var string */
 	protected $sourceTableName;
 
@@ -90,6 +93,11 @@ class Query implements IQuery, \Iterator
 	private function getPropertiesByTable($tableName)
 	{
 		$entityClass = $this->mapper->getEntityClass($tableName);
+		return $this->getPropertiesByEntity($entityClass);
+	}
+
+	private function getPropertiesByEntity($entityClass)
+	{
 		$reflection = $entityClass::getReflection($this->mapper);
 		$properties = [];
 		foreach ($reflection->getEntityProperties() as $property) {
@@ -311,7 +319,13 @@ class Query implements IQuery, \Iterator
 		$replacePlaceholders === NULL && $replacePlaceholders = (bool) $this->replacePlaceholders;
 
 		$rootTableName = $this->sourceTableName;
-		list($rootEntityClass, $rootProperties) = $this->getPropertiesByTable($rootTableName);
+
+		if ($this->castedEntityClass) {
+			list($rootEntityClass, $rootProperties) = $this->getPropertiesByEntity($this->castedEntityClass);
+
+		} else {
+			list($rootEntityClass, $rootProperties) = $this->getPropertiesByTable($rootTableName);
+		}
 
 		$switches = [
 			'@' => FALSE,
@@ -420,6 +434,20 @@ class Query implements IQuery, \Iterator
 	////////////////////////////////////////////////////
 
 	/**
+	 * @param  string
+	 * @return self
+	 */
+	public function cast($entityClass)
+	{
+		if ($this->castedEntityClass !== NULL) {
+			throw new InvalidStateException("Entity class is already casted to {$this->castedEntityClass} class.");
+		}
+		$this->castedEntityClass = $entityClass;
+		return $this;
+	}
+
+
+	/**
 	 * @inheritdoc
 	 * @throws     InvalidArgumentException
 	 */
@@ -457,6 +485,19 @@ class Query implements IQuery, \Iterator
 
 		$this->fluent = $fluent;
 		$this->mapper = $mapper;
+
+		if ($this->castedEntityClass !== NULL) {
+			$rootEntityClass = $this->mapper->getEntityClass($this->sourceTableName);
+
+			if (!is_a($this->castedEntityClass, $rootEntityClass, TRUE)) {
+				throw new InvalidArgumentException("Query object is limited to {$this->castedEntityClass} entity, {$rootEntityClass} entity used.");
+			}
+
+			if ($mapper instanceof ICaster) {
+				$mapper->castTo($fluent, $this->castedEntityClass);
+			}
+		}
+
 		// Add source table name to tables aliases list to avoid error
 		// when joining to itself.
 		$this->tablesAliases = [$this->sourceTableName];

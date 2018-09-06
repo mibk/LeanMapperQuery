@@ -35,7 +35,7 @@ class BaseRepository extends Repository
 	}
 }
 
-class ClientMapper extends TestMapper
+class ClientMapper extends TestMapper implements LeanMapperQuery\ICaster
 {
 	public function getEntityClass($table, LeanMapper\Row $row = NULL)
 	{
@@ -56,6 +56,18 @@ class ClientMapper extends TestMapper
 			return 'client';
 		}
 		return parent::getTable($entity);
+	}
+
+
+	public function castTo(LeanMapper\Fluent $fluent, $entityClass)
+	{
+		if ($entityClass === 'ClientIndividual') {
+			$fluent->where('%n.[type] = %s', $this->getTable($entityClass), Client::TYPE_INDIVIDUAL);
+		}
+
+		if ($entityClass === 'ClientCompany') {
+			$fluent->where('%n.[type] = %s', $this->getTable($entityClass), Client::TYPE_COMPANY);
+		}
 	}
 }
 
@@ -112,10 +124,14 @@ class Tag extends BaseEntity
 
 ////////////////
 
+$sqls = [];
 $connection = new LeanMapper\Connection([
 	'driver' => 'sqlite3',
 	'database' => __DIR__ . '/../db/clients.sq3',
 ]);
+$connection->onEvent[] = function ($event) use (&$sqls) {
+	$sqls[] = $event->sql;
+};
 $mapper = new ClientMapper;
 $clientRepository = new ClientRepository($connection, $mapper, $entityFactory);
 $tagRepository = new TagRepository($connection, $mapper, $entityFactory);
@@ -134,6 +150,27 @@ Assert::same('Seznam.cz', $clients[1]->name);
 Assert::same('ClientCompany', get_class($clients[1]));
 
 
+//////// repository query - field from child ////////
+$sqls = [];
+$clients = array_values($clientRepository->find(getQuery()
+	->cast('ClientCompany')
+	->where('@ic', '26168685')
+));
+
+Assert::same([
+	'SELECT [client].* FROM [client] WHERE [client].[type] = \'company\' AND ([client].[ic] = \'26168685\')',
+], $sqls);
+
+Assert::same(1, count($clients));
+Assert::same('Seznam.cz', $clients[0]->name);
+Assert::same('ClientCompany', get_class($clients[0]));
+
+Assert::exception(function () use ($clientRepository) {
+	$clientRepository->find(getQuery()->cast('Tag'));
+
+}, 'LeanMapperQuery\Exception\InvalidArgumentException', 'Query object is limited to Tag entity, Client entity used.');
+
+
 //////// entity query ////////
 $tags = $tagRepository->findAll();
 $tag = $tags[1];
@@ -148,3 +185,28 @@ Assert::same('ClientIndividual', get_class($tagClients[0]));
 
 Assert::same('Seznam.cz', $tagClients[1]->name);
 Assert::same('ClientCompany', get_class($tagClients[1]));
+
+
+//////// entity query - field from child ////////
+$tags = $tagRepository->findAll();
+$tag = $tags[1];
+
+$sqls = [];
+$tagClients = array_values($tag->find('clients', getQuery()
+	->cast('ClientCompany')
+	->where('@ic', '26168685')
+));
+
+Assert::same([
+	'SELECT [client_tag].* FROM [client_tag] WHERE [client_tag].[tag_id] IN (1, 2)',
+	'SELECT [client].* FROM [client] WHERE [client].[id] IN (1, 2) AND [client].[type] = \'company\' AND ([client].[ic] = \'26168685\')',
+], $sqls);
+
+Assert::same(1, count($tagClients));
+Assert::same('Seznam.cz', $tagClients[0]->name);
+Assert::same('ClientCompany', get_class($tagClients[0]));
+
+Assert::exception(function () use ($tag) {
+	$tag->find('clients', getQuery()->cast('Tag'));
+
+}, 'LeanMapperQuery\Exception\InvalidArgumentException', 'Query object is limited to Tag entity, Client entity used.');

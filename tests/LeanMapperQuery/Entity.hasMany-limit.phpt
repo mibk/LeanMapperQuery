@@ -1,12 +1,8 @@
 <?php
 
-/**
- * Test: LeanMapperQuery\Entity.
- * @author Michal Bohuslávek
- */
-
 use LeanMapper\Repository;
 use LeanMapperQuery\Entity;
+use LeanMapperQuery\Query;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
@@ -42,7 +38,8 @@ class Tag extends BaseEntity
 
 /**
  * @property int         $id
- * @property Tag[]       $tags        m:hasMany(#union)
+ * @property Tag[]       $tagsIn      m:hasMany
+ * @property-read Tag[]  $tagsUnion   m:hasMany(#union)
  * @property string      $name
  */
 class Book extends BaseEntity
@@ -52,22 +49,76 @@ class Book extends BaseEntity
 ////////////////
 
 $bookRepository = new BookRepository($connection, $mapper, $entityFactory);
-$books = $bookRepository->findAll();
-$result = array();
 
-foreach ($books as $book) {
-	$tags = $book->find('tags', getQuery()
-		->limit(1)
-	);
+function extractTags(BookRepository $bookRepository, $tagProperty, Query $query)
+{
+	$result = [];
 
-	$tag = reset($tags);
-	$result[$book->id] = $tag ? $tag->name : NULL;
+	foreach ($bookRepository->findAll() as $book) {
+		$tags = $book->find($tagProperty, $query);
+
+		if (count($tags) <= 1) {
+			$tag = reset($tags);
+			$result[$book->id] = $tag ? $tag->name : NULL;
+
+		} else {
+			foreach ($tags as $tag) {
+				$result[$book->id][] = $tag->name;
+			}
+		}
+	}
+
+	return $result;
 }
 
-Assert::same(array(
+
+////////////////
+
+$query = getQuery()
+	->limit(1);
+
+$expected = [
 	1 => 'popular',
 	2 => NULL,
 	3 => 'ebook',
 	4 => 'popular',
 	5 => NULL,
-), $result);
+];
+
+Assert::same($expected, extractTags($bookRepository, 'tagsIn', $query));
+Assert::same($expected, extractTags($bookRepository, 'tagsUnion', $query));
+
+
+////////////////
+
+$query = getQuery()
+	->offset(1);
+
+$expected = [
+	1 => 'ebook',
+	2 => NULL,
+	3 => NULL,
+	4 => NULL,
+	5 => NULL,
+];
+
+Assert::same($expected, extractTags($bookRepository, 'tagsIn', $query));
+Assert::same($expected, extractTags($bookRepository, 'tagsUnion', $query));
+
+
+////////////////
+
+$query = getQuery()
+	->orderBy('@name')
+	->limit(1);
+
+$expected = [
+	1 => 'ebook',
+	2 => NULL,
+	3 => 'ebook',
+	4 => 'popular',
+	5 => NULL,
+];
+
+Assert::same($expected, extractTags($bookRepository, 'tagsIn', $query));
+Assert::same($expected, extractTags($bookRepository, 'tagsUnion', $query));

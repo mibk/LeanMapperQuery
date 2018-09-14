@@ -69,6 +69,12 @@ class Query implements IQuery, \Iterator
 	/** @var Fluent|NULL */
 	private $fluent = NULL;
 
+	/** @var int|NULL */
+	private $limit = NULL;
+
+	/** @var int|NULL */
+	private $offset = NULL;
+
 	/** @var IMapper */
 	protected $mapper;
 
@@ -446,6 +452,41 @@ class Query implements IQuery, \Iterator
 		return $this;
 	}
 
+	/**
+	 * @return int|NULL
+	 */
+	public function getLimit()
+	{
+		return $this->limit;
+	}
+
+	/**
+	 * @return int|NULL
+	 */
+	public function getOffset()
+	{
+		return $this->offset;
+	}
+
+	/**
+	 * @param  int
+	 * @return self
+	 */
+	public function limit($limit)
+	{
+		$this->limit = $limit;
+		return $this;
+	}
+
+	/**
+	 * @param  int
+	 * @return self
+	 */
+	public function offset($offset)
+	{
+		$this->offset = $offset;
+		return $this;
+	}
 
 	/**
 	 * @inheritdoc
@@ -506,6 +547,15 @@ class Query implements IQuery, \Iterator
 			list($method, $args) = $call;
 			call_user_func_array([$this, $method], $args);
 		}
+
+		if ($this->limit !== NULL) {
+			$fluent->limit($this->limit);
+		}
+
+		if ($this->offset !== NULL) {
+			$fluent->offset($this->offset);
+		}
+
 		// Reset fluent.
 		$this->fluent = NULL;
 		return $fluent;
@@ -618,16 +668,6 @@ class Query implements IQuery, \Iterator
 	private function commandDesc($desc = TRUE)
 	{
 		$this->commandAsc(!$desc);
-	}
-
-	private function commandLimit($limit)
-	{
-		$this->fluent->limit($limit);
-	}
-
-	private function commandOffset($offset)
-	{
-		$this->fluent->offset($offset);
 	}
 
 	//////////////////// Iterator //////////////////////

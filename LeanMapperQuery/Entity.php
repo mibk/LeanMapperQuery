@@ -91,9 +91,30 @@ class Entity extends LeanMapper\Entity
 			$rows = [];
 			$resultRows = [];
 			$targetResultProxy = NULL;
+			$relationshipFiltering = NULL;
+			$strategy = $relationship->getStrategy();
 
-			foreach ($entity->row->referencing($relationshipTable, $sourceReferencingColumn) as $relationship) {
+			if ($query instanceof Query) {
+				$limit = $query->getLimit();
+				$offset = $query->getOffset();
+
+				if ($limit !== NULL || $offset !== NULL) {
+					$strategy = Result::STRATEGY_UNION;
+					$relationshipFiltering = new Filtering(function (Fluent $fluent) use ($limit, $offset) {
+						$fluent->limit($limit);
+						$fluent->offset($offset);
+					});
+
+					$filters[] = function (Fluent $fluent) {
+						$fluent->removeClause('LIMIT');
+						$fluent->removeClause('OFFSET');
+					};
+				}
+			}
+
+			foreach ($entity->row->referencing($relationshipTable, $sourceReferencingColumn, $relationshipFiltering, $strategy) as $relationship) {
 				$row = $relationship->referenced($targetTable, $targetReferencingColumn, new Filtering($filters));
+
 				if ($row !== NULL && $targetResultProxy === NULL) {
 					$targetResultProxy = $row->getResultProxy();
 				}

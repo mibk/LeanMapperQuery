@@ -1,4 +1,5 @@
 language: php
+dist: precise
 php:
   - 5.3
   - 5.4
@@ -9,7 +10,6 @@ php:
 
 script:
   - vendor/bin/tester tests -s -p php
-  - php temp/code-checker/src/code-checker.php
 
 after_failure:
   # Print *.actual content
@@ -18,7 +18,6 @@ after_failure:
 before_script:
   # Install Nette Tester
   - travis_retry composer install --no-interaction --prefer-dist
-  - travis_retry composer create-project nette/code-checker temp/code-checker ~2.5.0
 
 sudo: false
 

@@ -122,3 +122,21 @@ $expected = [
 
 Assert::same($expected, extractTags($bookRepository, 'tagsIn', $query));
 Assert::same($expected, extractTags($bookRepository, 'tagsUnion', $query));
+
+
+////////////////
+
+$query = getQuery()
+	->where('@name', 'ebook')
+	->limit(1);
+
+$expected = [
+	1 => 'ebook',
+	2 => NULL,
+	3 => 'ebook',
+	4 => NULL,
+	5 => NULL,
+];
+
+Assert::same($expected, extractTags($bookRepository, 'tagsIn', $query));
+Assert::same($expected, extractTags($bookRepository, 'tagsUnion', $query));

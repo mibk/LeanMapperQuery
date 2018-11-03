@@ -100,7 +100,14 @@ class Entity extends LeanMapper\Entity
 
 				if ($limit !== NULL || $offset !== NULL) {
 					$strategy = Result::STRATEGY_UNION;
-					$relationshipFiltering = new Filtering(function (Fluent $fluent) use ($limit, $offset) {
+					$relationshipFiltering = new Filtering(function (Fluent $fluent) use ($limit, $offset, $mapper, $query, $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey) {
+						$query->applyQuery($fluent, $mapper, $targetTable);
+
+						if ($fluent->_export('WHERE') || $fluent->_export('ORDER BY')) {
+							$fluent->leftJoin($targetTable)
+								->on("%n.%n = %n.%n", $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey);
+						}
+
 						$fluent->limit($limit);
 						$fluent->offset($offset);
 					});

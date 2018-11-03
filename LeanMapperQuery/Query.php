@@ -75,6 +75,9 @@ class Query implements IQuery, \Iterator
 	/** @var int|NULL */
 	private $offset = NULL;
 
+	/** @var string|NULL */
+	private $primaryTable;
+
 	/** @var IMapper */
 	protected $mapper;
 
@@ -324,7 +327,7 @@ class Query implements IQuery, \Iterator
 		}
 		$replacePlaceholders === NULL && $replacePlaceholders = (bool) $this->replacePlaceholders;
 
-		$rootTableName = $this->sourceTableName;
+		$rootTableName = $this->primaryTable !== NULL ? $this->primaryTable : $this->sourceTableName;
 
 		if ($this->castedEntityClass) {
 			list($rootEntityClass, $rootProperties) = $this->getPropertiesByEntity($this->castedEntityClass);
@@ -492,8 +495,9 @@ class Query implements IQuery, \Iterator
 	 * @inheritdoc
 	 * @throws     InvalidArgumentException
 	 */
-	public function applyQuery(Fluent $fluent, IMapper $mapper)
+	public function applyQuery(Fluent $fluent, IMapper $mapper, $primaryTable = NULL)
 	{
+		$this->primaryTable = $primaryTable;
 		// NOTE:
 		// $fluent is expected to have called method Fluent::from
 		// with pure table name as an argument. For example:
@@ -558,6 +562,7 @@ class Query implements IQuery, \Iterator
 
 		// Reset fluent.
 		$this->fluent = NULL;
+		$this->primaryTable = NULL;
 		return $fluent;
 	}
 

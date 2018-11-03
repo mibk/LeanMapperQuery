@@ -20,7 +20,14 @@ interface IQuery
 	/**
 	 * @param  Fluent  $fluent
 	 * @param  IMapper $mapper
+	 * @param  string|NULL $primaryTable
 	 * @return Fluent
 	 */
-	public function applyQuery(Fluent $fluent, IMapper $mapper);
+	public function applyQuery(Fluent $fluent, IMapper $mapper, $primaryTable = NULL);
+
+	/**
+	 * @return bool
+	 */
+	public function hasLimitOrOffset();
+
 }

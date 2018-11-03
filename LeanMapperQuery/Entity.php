@@ -94,29 +94,21 @@ class Entity extends LeanMapper\Entity
 			$relationshipFiltering = NULL;
 			$strategy = $relationship->getStrategy();
 
-			if ($query instanceof Query) {
-				$limit = $query->getLimit();
-				$offset = $query->getOffset();
+			if ($query->hasLimitOrOffset()) {
+				$strategy = Result::STRATEGY_UNION;
+				$relationshipFiltering = new Filtering(function (Fluent $fluent) use ($mapper, $query, $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey) {
+					$query->applyQuery($fluent, $mapper, $targetTable);
 
-				if ($limit !== NULL || $offset !== NULL) {
-					$strategy = Result::STRATEGY_UNION;
-					$relationshipFiltering = new Filtering(function (Fluent $fluent) use ($limit, $offset, $mapper, $query, $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey) {
-						$query->applyQuery($fluent, $mapper, $targetTable);
+					if ($fluent->_export('WHERE') || $fluent->_export('ORDER BY')) {
+						$fluent->leftJoin($targetTable)
+							->on("%n.%n = %n.%n", $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey);
+					}
+				});
 
-						if ($fluent->_export('WHERE') || $fluent->_export('ORDER BY')) {
-							$fluent->leftJoin($targetTable)
-								->on("%n.%n = %n.%n", $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey);
-						}
-
-						$fluent->limit($limit);
-						$fluent->offset($offset);
-					});
-
-					$filters[] = function (Fluent $fluent) {
-						$fluent->removeClause('LIMIT');
-						$fluent->removeClause('OFFSET');
-					};
-				}
+				$filters[] = function (Fluent $fluent) {
+					$fluent->removeClause('LIMIT');
+					$fluent->removeClause('OFFSET');
+				};
 			}
 
 			foreach ($entity->row->referencing($relationshipTable, $sourceReferencingColumn, $relationshipFiltering, $strategy) as $relationship) {

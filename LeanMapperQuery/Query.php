@@ -456,42 +456,6 @@ class Query implements IQuery, \Iterator
 	}
 
 	/**
-	 * @return int|NULL
-	 */
-	public function getLimit()
-	{
-		return $this->limit;
-	}
-
-	/**
-	 * @return int|NULL
-	 */
-	public function getOffset()
-	{
-		return $this->offset;
-	}
-
-	/**
-	 * @param  int
-	 * @return self
-	 */
-	public function limit($limit)
-	{
-		$this->limit = $limit;
-		return $this;
-	}
-
-	/**
-	 * @param  int
-	 * @return self
-	 */
-	public function offset($offset)
-	{
-		$this->offset = $offset;
-		return $this;
-	}
-
-	/**
 	 * @inheritdoc
 	 * @throws     InvalidArgumentException
 	 */
@@ -567,6 +531,14 @@ class Query implements IQuery, \Iterator
 	}
 
 	/**
+	 * @return bool
+	 */
+	public function hasLimitOrOffset()
+	{
+		return $this->limit !== NULL || $this->offset !== NULL;
+	}
+
+	/**
 	 * Enqueues command.
 	 * @param  string $name Command name
 	 * @param  array  $args
@@ -575,6 +547,14 @@ class Query implements IQuery, \Iterator
 	 */
 	public function __call($name, array $args)
 	{
+		if ($name === 'limit' || $name === 'offset') {
+			if (empty($args)) {
+				throw new InvalidArgumentException("Method '$name' requires argument.");
+			}
+			$this->$name = reset($args);
+			return $this;
+		}
+
 		$method = 'command' . ucfirst($name);
 		if (!method_exists($this, $method)) {
 			throw new NonExistingMethodException("Command '$name' doesn't exist. To register this command there should be defined protected method " . get_called_class() . "::$method.");

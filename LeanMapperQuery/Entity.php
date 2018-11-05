@@ -33,10 +33,15 @@ class Entity extends LeanMapper\Entity
 
 	protected function queryProperty($field, IQuery $query)
 	{
-		if ($this->isDetached()) {
+		return static::queryEntityProperty($this, $field, $query);
+	}
+
+	public static function queryEntityProperty(LeanMapper\Entity $entity, $field, IQuery $query)
+	{
+		if ($entity->isDetached()) {
 			throw new InvalidStateException('Cannot query detached entity.');
 		}
-		$property = $this->getCurrentReflection()->getEntityProperty($field);
+		$property = $entity->getCurrentReflection()->getEntityProperty($field);
 		if ($property === NULL) {
 			throw new MemberAccessException("Cannot access undefined property '$field' in entity " . get_called_class() . '.');
 		}
@@ -44,8 +49,8 @@ class Entity extends LeanMapper\Entity
 			throw new InvalidArgumentException("Property '{$property->getName()}' in entity ". get_called_class() . " has no relationship.");
 		}
 		$class = $property->getType();
-		$filters = $this->createImplicitFilters($class, new Caller($this, $property))->getFilters();
-		$mapper = $this->mapper;
+		$filters = $entity->createImplicitFilters($class, new Caller($entity, $property))->getFilters();
+		$mapper = $entity->mapper;
 		$filters[] = function (Fluent $fluent) use ($mapper, $query) {
 			$query->applyQuery($fluent, $mapper);
 		};
@@ -68,13 +73,13 @@ class Entity extends LeanMapper\Entity
 			$rows = [];
 
 			try {
-				$rows = $this->row->referencing($targetTable, $referencingColumn, new Filtering($filters), $strategy);
+				$rows = $entity->row->referencing($targetTable, $referencingColumn, new Filtering($filters), $strategy);
 
 			} catch (InvalidStrategyException $e) {
 				if ($detectStrategy) {
 					array_pop($filters); // remove detector
 				}
-				$rows = $this->row->referencing($targetTable, $referencingColumn, new Filtering($filters), Result::STRATEGY_UNION);
+				$rows = $entity->row->referencing($targetTable, $referencingColumn, new Filtering($filters), Result::STRATEGY_UNION);
 			}
 
 		} elseif ($relationship instanceof Relationship\HasMany) {
@@ -87,7 +92,7 @@ class Entity extends LeanMapper\Entity
 			$resultRows = [];
 			$targetResultProxy = NULL;
 
-			foreach ($this->row->referencing($relationshipTable, $sourceReferencingColumn) as $relationship) {
+			foreach ($entity->row->referencing($relationshipTable, $sourceReferencingColumn) as $relationship) {
 				$row = $relationship->referenced($targetTable, $targetReferencingColumn, new Filtering($filters));
 				if ($row !== NULL && $targetResultProxy === NULL) {
 					$targetResultProxy = $row->getResultProxy();
@@ -111,9 +116,9 @@ class Entity extends LeanMapper\Entity
 		$entities = [];
 		$table = $mapper->getTable($class);
 		foreach ($rows as $row) {
-			$entity = $this->entityFactory->createEntity($mapper->getEntityClass($table, $row), $row);
-			$entity->makeAlive($this->entityFactory);
-			$entities[] = $entity;
+			$newEntity = $entity->entityFactory->createEntity($mapper->getEntityClass($table, $row), $row);
+			$newEntity->makeAlive($entity->entityFactory);
+			$entities[] = $newEntity;
 		}
 		return $entities;
 	}

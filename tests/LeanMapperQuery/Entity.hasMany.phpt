@@ -94,10 +94,22 @@ Assert::same($expected, extractTags($bookRepository, 'tagsIn', $query));
 Assert::same($expected, extractTags($bookRepository, 'tagsUnion', $query));
 Assert::same($sqls, [
 	'SELECT [book].* FROM [book]',
-	'SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 LIMIT 1)',
+	'SELECT * FROM (' . implode(') UNION SELECT * FROM (', [
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 LIMIT 1',
+	]) . ')',
 	'SELECT [tag].* FROM [tag] WHERE [tag].[id] IN (1, 2)',
 	'SELECT [book].* FROM [book]',
-	'SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 LIMIT 1)',
+	'SELECT * FROM (' . implode(') UNION SELECT * FROM (', [
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 LIMIT 1',
+	]) . ')',
 	'SELECT [tag].* FROM [tag] WHERE [tag].[id] IN (1, 2)',
 ]);
 
@@ -120,10 +132,22 @@ Assert::same($expected, extractTags($bookRepository, 'tagsIn', $query));
 Assert::same($expected, extractTags($bookRepository, 'tagsUnion', $query));
 Assert::same($sqls, [
 	'SELECT [book].* FROM [book]',
-	'SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 LIMIT -1 OFFSET 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 LIMIT -1 OFFSET 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 LIMIT -1 OFFSET 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 LIMIT -1 OFFSET 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 LIMIT -1 OFFSET 1)',
+	'SELECT * FROM (' . implode(') UNION SELECT * FROM (', [
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 LIMIT -1 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 LIMIT -1 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 LIMIT -1 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 LIMIT -1 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 LIMIT -1 OFFSET 1',
+	]) . ')',
 	'SELECT [tag].* FROM [tag] WHERE [tag].[id] IN (2)',
 	'SELECT [book].* FROM [book]',
-	'SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 LIMIT -1 OFFSET 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 LIMIT -1 OFFSET 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 LIMIT -1 OFFSET 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 LIMIT -1 OFFSET 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 LIMIT -1 OFFSET 1)',
+	'SELECT * FROM (' . implode(') UNION SELECT * FROM (', [
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 LIMIT -1 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 LIMIT -1 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 LIMIT -1 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 LIMIT -1 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 LIMIT -1 OFFSET 1',
+	]) . ')',
 	'SELECT [tag].* FROM [tag] WHERE [tag].[id] IN (2)',
 ]);
 
@@ -147,10 +171,22 @@ Assert::same($expected, extractTags($bookRepository, 'tagsIn', $query));
 Assert::same($expected, extractTags($bookRepository, 'tagsUnion', $query));
 Assert::same($sqls, [
 	'SELECT [book].* FROM [book]',
-	'SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 ORDER BY [tag].[name] LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 ORDER BY [tag].[name] LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 ORDER BY [tag].[name] LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 ORDER BY [tag].[name] LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 ORDER BY [tag].[name] LIMIT 1)',
+	'SELECT * FROM (' . implode(') UNION SELECT * FROM (', [
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 ORDER BY [tag].[name] LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 ORDER BY [tag].[name] LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 ORDER BY [tag].[name] LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 ORDER BY [tag].[name] LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 ORDER BY [tag].[name] LIMIT 1',
+	]) . ')',
 	'SELECT [tag].* FROM [tag] WHERE [tag].[id] IN (2, 1) ORDER BY [tag].[name]',
 	'SELECT [book].* FROM [book]',
-	'SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 ORDER BY [tag].[name] LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 ORDER BY [tag].[name] LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 ORDER BY [tag].[name] LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 ORDER BY [tag].[name] LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 ORDER BY [tag].[name] LIMIT 1)',
+	'SELECT * FROM (' . implode(') UNION SELECT * FROM (', [
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 ORDER BY [tag].[name] LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 ORDER BY [tag].[name] LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 ORDER BY [tag].[name] LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 ORDER BY [tag].[name] LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 ORDER BY [tag].[name] LIMIT 1',
+	]) . ')',
 	'SELECT [tag].* FROM [tag] WHERE [tag].[id] IN (2, 1) ORDER BY [tag].[name]',
 ]);
 
@@ -174,9 +210,21 @@ Assert::same($expected, extractTags($bookRepository, 'tagsIn', $query));
 Assert::same($expected, extractTags($bookRepository, 'tagsUnion', $query));
 Assert::same($sqls, [
 	'SELECT [book].* FROM [book]',
-	'SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 AND ([tag].[name] = \'ebook\') LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 AND ([tag].[name] = \'ebook\') LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 AND ([tag].[name] = \'ebook\') LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 AND ([tag].[name] = \'ebook\') LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 AND ([tag].[name] = \'ebook\') LIMIT 1)',
+	'SELECT * FROM (' . implode(') UNION SELECT * FROM (', [
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 AND ([tag].[name] = \'ebook\') LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 AND ([tag].[name] = \'ebook\') LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 AND ([tag].[name] = \'ebook\') LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 AND ([tag].[name] = \'ebook\') LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 AND ([tag].[name] = \'ebook\') LIMIT 1',
+	]) . ')',
 	'SELECT [tag].* FROM [tag] WHERE [tag].[id] IN (2) AND ([tag].[name] = \'ebook\')',
 	'SELECT [book].* FROM [book]',
-	'SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 AND ([tag].[name] = \'ebook\') LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 AND ([tag].[name] = \'ebook\') LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 AND ([tag].[name] = \'ebook\') LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 AND ([tag].[name] = \'ebook\') LIMIT 1) UNION SELECT * FROM (SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 AND ([tag].[name] = \'ebook\') LIMIT 1)',
+	'SELECT * FROM (' . implode(') UNION SELECT * FROM (', [
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 AND ([tag].[name] = \'ebook\') LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 AND ([tag].[name] = \'ebook\') LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 AND ([tag].[name] = \'ebook\') LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 AND ([tag].[name] = \'ebook\') LIMIT 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 AND ([tag].[name] = \'ebook\') LIMIT 1',
+	]) . ')',
 	'SELECT [tag].* FROM [tag] WHERE [tag].[id] IN (2) AND ([tag].[name] = \'ebook\')',
 ]);

@@ -533,7 +533,7 @@ class Query implements IQuery, \Iterator
 	/**
 	 * @return bool
 	 */
-	public function hasLimitOrOffset()
+	public function junctionQueryNeeded()
 	{
 		return $this->limit !== NULL || $this->offset !== NULL;
 	}

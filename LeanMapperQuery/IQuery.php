@@ -28,6 +28,6 @@ interface IQuery
 	/**
 	 * @return bool
 	 */
-	public function hasLimitOrOffset();
+	public function junctionQueryNeeded();
 
 }

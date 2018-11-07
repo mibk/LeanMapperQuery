@@ -113,7 +113,6 @@ class Entity extends LeanMapper\Entity
 
 			foreach ($entity->row->referencing($relationshipTable, $sourceReferencingColumn, $relationshipFiltering, $strategy) as $relationship) {
 				$row = $relationship->referenced($targetTable, $targetReferencingColumn, new Filtering($filters));
-
 				if ($row !== NULL && $targetResultProxy === NULL) {
 					$targetResultProxy = $row->getResultProxy();
 				}

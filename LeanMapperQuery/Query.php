@@ -75,9 +75,6 @@ class Query implements IQuery, \Iterator
 	/** @var int|NULL */
 	private $offset = NULL;
 
-	/** @var string|NULL */
-	private $primaryTable;
-
 	/** @var IMapper */
 	protected $mapper;
 
@@ -327,7 +324,7 @@ class Query implements IQuery, \Iterator
 		}
 		$replacePlaceholders === NULL && $replacePlaceholders = (bool) $this->replacePlaceholders;
 
-		$rootTableName = $this->primaryTable !== NULL ? $this->primaryTable : $this->sourceTableName;
+		$rootTableName = $this->sourceTableName;
 
 		if ($this->castedEntityClass) {
 			list($rootEntityClass, $rootProperties) = $this->getPropertiesByEntity($this->castedEntityClass);
@@ -459,9 +456,29 @@ class Query implements IQuery, \Iterator
 	 * @inheritdoc
 	 * @throws     InvalidArgumentException
 	 */
-	public function applyQuery(Fluent $fluent, IMapper $mapper, $primaryTable = NULL)
+	public function applyQuery(Fluent $fluent, IMapper $mapper)
 	{
-		$this->primaryTable = $primaryTable;
+		return $this->apply($fluent, $mapper);
+	}
+
+	/**
+	 * @inheritdoc
+	 * @throws     InvalidArgumentException
+	 */
+	public function applyJunctionQuery(Fluent $fluent, IMapper $mapper, $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey)
+	{
+		$fluent = $this->apply($fluent, $mapper, $targetTable);
+
+		if ($fluent->_export('WHERE') || $fluent->_export('ORDER BY')) {
+			$fluent->leftJoin($targetTable)
+				->on("%n.%n = %n.%n", $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey);
+		}
+
+		return $fluent;
+	}
+
+	private function apply(Fluent $fluent, IMapper $mapper, $sourceTableName = NULL)
+	{
 		// NOTE:
 		// $fluent is expected to have called method Fluent::from
 		// with pure table name as an argument. For example:
@@ -479,7 +496,7 @@ class Query implements IQuery, \Iterator
 		if (count($fromClause) < 3 || $fromClause[1] !== '%n') {
 			throw new InvalidArgumentException('Unsupported fluent from clause. Only pure table name as an argument of \\LeanMapper\\Fluent::from method is supported.');
 		}
-		$this->sourceTableName = $fromClause[2];
+		$this->sourceTableName = $sourceTableName !== NULL ? $sourceTableName : $fromClause[2];
 		if (count($fromClause) > 3) { // complicated from clause
 			$subFluent = clone $fluent;
 			// Reset fluent.
@@ -526,7 +543,6 @@ class Query implements IQuery, \Iterator
 
 		// Reset fluent.
 		$this->fluent = NULL;
-		$this->primaryTable = NULL;
 		return $fluent;
 	}
 

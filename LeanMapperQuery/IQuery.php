@@ -20,10 +20,16 @@ interface IQuery
 	/**
 	 * @param  Fluent  $fluent
 	 * @param  IMapper $mapper
-	 * @param  string|NULL $primaryTable
 	 * @return Fluent
 	 */
-	public function applyQuery(Fluent $fluent, IMapper $mapper, $primaryTable = NULL);
+	public function applyQuery(Fluent $fluent, IMapper $mapper);
+
+	/**
+	 * @param  Fluent  $fluent
+	 * @param  IMapper $mapper
+	 * @return Fluent
+	 */
+	public function applyJunctionQuery(Fluent $fluent, IMapper $mapper, $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey);
 
 	/**
 	 * @return bool

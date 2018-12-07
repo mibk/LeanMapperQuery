@@ -69,12 +69,6 @@ class Query implements IQuery, \Iterator
 	/** @var Fluent|NULL */
 	private $fluent = NULL;
 
-	/** @var int|NULL */
-	private $limit = NULL;
-
-	/** @var int|NULL */
-	private $offset = NULL;
-
 	/** @var IMapper */
 	protected $mapper;
 
@@ -86,6 +80,9 @@ class Query implements IQuery, \Iterator
 
 	/** @var array */
 	private $queue = [];
+
+	/** @var array */
+	private $limitQueue = [];
 
 	/** @var array */
 	private $tablesAliases;
@@ -465,15 +462,18 @@ class Query implements IQuery, \Iterator
 	 * @inheritdoc
 	 * @throws     InvalidArgumentException
 	 */
-	public function applyJunctionQuery(Fluent $fluent, IMapper $mapper, $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey)
+	public function applyJunctionQuery(Fluent $fluent, IMapper $mapper, Relationship\HasMany $rel)
 	{
-		$fluent = $this->apply($fluent, $mapper, $targetTable);
+		$relationshipTable = $rel->getRelationshipTable();
+		$targetReferencingColumn = $rel->getColumnReferencingTargetTable();
+		$targetTable = $rel->getTargetTable();
+		$targetPrimaryKey = $mapper->getPrimaryKey($targetTable);
 
-		if ($fluent->_export('WHERE') || $fluent->_export('ORDER BY')) {
+		$fluent = $this->apply($fluent, $mapper, $targetTable);
+		if (!empty($fluent->_export('WHERE')) || !empty($fluent->_export('ORDER BY'))) {
 			$fluent->leftJoin($targetTable)
 				->on("%n.%n = %n.%n", $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey);
 		}
-
 		return $fluent;
 	}
 
@@ -528,17 +528,9 @@ class Query implements IQuery, \Iterator
 		// when joining to itself.
 		$this->tablesAliases = [$this->sourceTableName];
 
-		foreach ($this->queue as $call) {
+		foreach (array_merge($this->queue, $this->limitQueue) as $call) {
 			list($method, $args) = $call;
 			call_user_func_array([$this, $method], $args);
-		}
-
-		if ($this->limit !== NULL) {
-			$fluent->limit($this->limit);
-		}
-
-		if ($this->offset !== NULL) {
-			$fluent->offset($this->offset);
 		}
 
 		// Reset fluent.
@@ -551,7 +543,7 @@ class Query implements IQuery, \Iterator
 	 */
 	public function junctionQueryNeeded()
 	{
-		return $this->limit !== NULL || $this->offset !== NULL;
+		return !empty($this->limitQueue);
 	}
 
 	/**
@@ -563,19 +555,20 @@ class Query implements IQuery, \Iterator
 	 */
 	public function __call($name, array $args)
 	{
-		if ($name === 'limit' || $name === 'offset') {
-			if (empty($args)) {
-				throw new InvalidArgumentException("Method '$name' requires argument.");
-			}
-			$this->$name = reset($args);
-			return $this;
-		}
-
 		$method = 'command' . ucfirst($name);
 		if (!method_exists($this, $method)) {
 			throw new NonExistingMethodException("Command '$name' doesn't exist. To register this command there should be defined protected method " . get_called_class() . "::$method.");
 		}
-		$this->queue[] = [$method, $args];
+
+		switch ($name) {
+		case 'limit':
+		case 'offset':
+			$this->limitQueue[] = [$method, $args];
+			break;
+		default:
+			$this->queue[] = [$method, $args];
+			break;
+		}
 		return $this;
 	}
 
@@ -669,6 +662,16 @@ class Query implements IQuery, \Iterator
 	private function commandDesc($desc = TRUE)
 	{
 		$this->commandAsc(!$desc);
+	}
+
+	private function commandLimit($limit)
+	{
+		$this->fluent->limit($limit);
+	}
+
+	private function commandOffset($offset)
+	{
+		$this->fluent->offset($offset);
 	}
 
 	//////////////////// Iterator //////////////////////

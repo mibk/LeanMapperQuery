@@ -80,8 +80,8 @@ class Entity extends LeanMapper\Entity
 
 			if ($query->junctionQueryNeeded()) {
 				$strategy = Result::STRATEGY_UNION;
-				$relationshipFiltering = new Filtering(function (Fluent $fluent) use ($mapper, $query, $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey) {
-					$query->applyJunctionQuery($fluent, $mapper, $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey);
+				$relationshipFiltering = new Filtering(function (Fluent $fluent) use ($mapper, $query, $relationship) {
+					$query->applyJunctionQuery($fluent, $mapper, $relationship);
 				});
 
 				$filters[] = function (Fluent $fluent) {

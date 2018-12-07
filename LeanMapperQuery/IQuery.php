@@ -10,6 +10,7 @@ namespace LeanMapperQuery;
 
 use LeanMapper\Fluent;
 use LeanMapper\IMapper;
+use LeanMapper\Relationship;
 
 /**
  * @author Michal Bohuslávek
@@ -29,11 +30,10 @@ interface IQuery
 	 * @param  IMapper $mapper
 	 * @return Fluent
 	 */
-	public function applyJunctionQuery(Fluent $fluent, IMapper $mapper, $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey);
+	public function applyJunctionQuery(Fluent $fluent, IMapper $mapper, Relationship\HasMany $rel);
 
 	/**
 	 * @return bool
 	 */
 	public function junctionQueryNeeded();
-
 }

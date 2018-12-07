@@ -470,7 +470,7 @@ class Query implements IQuery, \Iterator
 		$targetPrimaryKey = $mapper->getPrimaryKey($targetTable);
 
 		$fluent = $this->apply($fluent, $mapper, $targetTable);
-		if (!empty($fluent->_export('WHERE')) || !empty($fluent->_export('ORDER BY'))) {
+		if ($fluent->_export('WHERE') || $fluent->_export('ORDER BY')) {
 			$fluent->leftJoin($targetTable)
 				->on("%n.%n = %n.%n", $relationshipTable, $targetReferencingColumn, $targetTable, $targetPrimaryKey);
 		}

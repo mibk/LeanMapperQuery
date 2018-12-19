@@ -14,6 +14,7 @@ use LeanMapper\IMapper;
 use LeanMapper\ImplicitFilters;
 use LeanMapper\Reflection\Property;
 use LeanMapper\Relationship;
+use LeanMapper\Result;
 use LeanMapperQuery\Exception\InvalidArgumentException;
 use LeanMapperQuery\Exception\InvalidRelationshipException;
 use LeanMapperQuery\Exception\InvalidStateException;
@@ -80,6 +81,9 @@ class Query implements IQuery, \Iterator
 
 	/** @var array */
 	private $queue = [];
+
+	/** @var array */
+	private $limitQueue = [];
 
 	/** @var array */
 	private $tablesAliases;
@@ -446,12 +450,45 @@ class Query implements IQuery, \Iterator
 		return $this;
 	}
 
-
 	/**
 	 * @inheritdoc
 	 * @throws     InvalidArgumentException
 	 */
-	public function applyQuery(Fluent $fluent, IMapper $mapper)
+	public function applyQuery(Fluent $fluent, IMapper $mapper, QueryTarget\ITarget $target = NULL)
+	{
+		$targetTable = NULL;
+
+		if ($target instanceof QueryTarget\HasManyRelationshipTable) {
+			$targetTable = $target->getRelationship()->getTargetTable();
+		}
+
+		$fluent = $this->apply($fluent, $mapper, $targetTable);
+
+		if ($target instanceof QueryTarget\HasManyRelationshipTable) {
+			if ($fluent->_export('WHERE') || $fluent->_export('ORDER BY')) {
+				$relationship = $target->getRelationship();
+				$fluent->leftJoin($targetTable)
+					->on(
+						"%n.%n = %n.%n",
+						$relationship->getRelationshipTable(),
+						$relationship->getColumnReferencingTargetTable(),
+						$targetTable,
+						$mapper->getPrimaryKey($targetTable)
+					);
+			}
+
+		} elseif ($target instanceof QueryTarget\HasManyTargetTable) {
+			$fluent->removeClause('LIMIT');
+			$fluent->removeClause('OFFSET');
+
+		} elseif ($target !== NULL) {
+			throw new InvalidArgumentException('Unsupported query target.');
+		}
+
+		return $fluent;
+	}
+
+	private function apply(Fluent $fluent, IMapper $mapper, $sourceTableName = NULL)
 	{
 		// NOTE:
 		// $fluent is expected to have called method Fluent::from
@@ -470,7 +507,7 @@ class Query implements IQuery, \Iterator
 		if (count($fromClause) < 3 || $fromClause[1] !== '%n') {
 			throw new InvalidArgumentException('Unsupported fluent from clause. Only pure table name as an argument of \\LeanMapper\\Fluent::from method is supported.');
 		}
-		$this->sourceTableName = $fromClause[2];
+		$this->sourceTableName = $sourceTableName !== NULL ? $sourceTableName : $fromClause[2];
 		if (count($fromClause) > 3) { // complicated from clause
 			$subFluent = clone $fluent;
 			// Reset fluent.
@@ -502,13 +539,22 @@ class Query implements IQuery, \Iterator
 		// when joining to itself.
 		$this->tablesAliases = [$this->sourceTableName];
 
-		foreach ($this->queue as $call) {
+		foreach (array_merge($this->queue, $this->limitQueue) as $call) {
 			list($method, $args) = $call;
 			call_user_func_array([$this, $method], $args);
 		}
+
 		// Reset fluent.
 		$this->fluent = NULL;
 		return $fluent;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getStrategy()
+	{
+		return empty($this->limitQueue) ? Result::STRATEGY_IN : Result::STRATEGY_UNION;
 	}
 
 	/**
@@ -524,7 +570,16 @@ class Query implements IQuery, \Iterator
 		if (!method_exists($this, $method)) {
 			throw new NonExistingMethodException("Command '$name' doesn't exist. To register this command there should be defined protected method " . get_called_class() . "::$method.");
 		}
-		$this->queue[] = [$method, $args];
+
+		switch ($name) {
+		case 'limit':
+		case 'offset':
+			$this->limitQueue[] = [$method, $args];
+			break;
+		default:
+			$this->queue[] = [$method, $args];
+			break;
+		}
 		return $this;
 	}
 

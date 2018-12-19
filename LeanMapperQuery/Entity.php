@@ -19,7 +19,6 @@ use LeanMapperQuery\Exception\InvalidArgumentException;
 use LeanMapperQuery\Exception\InvalidMethodCallException;
 use LeanMapperQuery\Exception\InvalidRelationshipException;
 use LeanMapperQuery\Exception\InvalidStateException;
-use LeanMapperQuery\Exception\InvalidStrategyException;
 use LeanMapperQuery\Exception\MemberAccessException;
 use LeanMapperQuery\IQuery;
 
@@ -51,38 +50,32 @@ class Entity extends LeanMapper\Entity
 		$class = $property->getType();
 		$filters = $entity->createImplicitFilters($class, new Caller($entity, $property))->getFilters();
 		$mapper = $entity->mapper;
-		$filters[] = function (Fluent $fluent) use ($mapper, $query) {
-			$query->applyQuery($fluent, $mapper);
-		};
-
 		$relationship = $property->getRelationship();
+
+		if (!($relationship instanceof Relationship\BelongsToMany) && !($relationship instanceof Relationship\HasMany)) {
+			throw new InvalidRelationshipException('Only BelongsToMany and HasMany relationships are supported when querying entity property. ' . get_class($relationship) . ' given.');
+		}
+
+		$strategy = $relationship->getStrategy();
+
+		if ($strategy !== Result::STRATEGY_UNION) {
+			$strategy = $query->getStrategy();
+		}
+
 		if ($relationship instanceof Relationship\BelongsToMany) {
+			$filters[] = function (Fluent $fluent) use ($mapper, $query) {
+				$query->applyQuery($fluent, $mapper);
+			};
+
 			$targetTable = $relationship->getTargetTable();
 			$referencingColumn = $relationship->getColumnReferencingSourceTable();
-			$strategy = $relationship->getStrategy();
-			$detectStrategy = $strategy !== Result::STRATEGY_UNION;
-
-			if ($detectStrategy) {
-				$filters[] = function (Fluent $fluent) {
-					if ($fluent->_export('LIMIT') || $fluent->_export('OFFSET')) {
-						throw new InvalidStrategyException('Fluent uses LIMIT or OFFSET, use UNION strategy.');
-					}
-				};
-			}
-
-			$rows = [];
-
-			try {
-				$rows = $entity->row->referencing($targetTable, $referencingColumn, new Filtering($filters), $strategy);
-
-			} catch (InvalidStrategyException $e) {
-				if ($detectStrategy) {
-					array_pop($filters); // remove detector
-				}
-				$rows = $entity->row->referencing($targetTable, $referencingColumn, new Filtering($filters), Result::STRATEGY_UNION);
-			}
+			$rows = $entity->row->referencing($targetTable, $referencingColumn, new Filtering($filters), $strategy);
 
 		} elseif ($relationship instanceof Relationship\HasMany) {
+			$filters[] = function (Fluent $fluent) use ($mapper, $query) {
+				$query->applyQuery($fluent, $mapper, new QueryTarget\HasManyTargetTable);
+			};
+
 			$relationshipTable = $relationship->getRelationshipTable();
 			$sourceReferencingColumn = $relationship->getColumnReferencingSourceTable();
 			$targetReferencingColumn = $relationship->getColumnReferencingTargetTable();
@@ -91,8 +84,15 @@ class Entity extends LeanMapper\Entity
 			$rows = [];
 			$resultRows = [];
 			$targetResultProxy = NULL;
+			$relationshipFiltering = NULL;
 
-			foreach ($entity->row->referencing($relationshipTable, $sourceReferencingColumn) as $relationship) {
+			if ($strategy === Result::STRATEGY_UNION) {
+				$relationshipFiltering = new Filtering(function (Fluent $fluent) use ($mapper, $query, $relationship) {
+					$query->applyQuery($fluent, $mapper, new QueryTarget\HasManyRelationshipTable($relationship));
+				});
+			}
+
+			foreach ($entity->row->referencing($relationshipTable, $sourceReferencingColumn, $relationshipFiltering, $strategy) as $relationship) {
 				$row = $relationship->referenced($targetTable, $targetReferencingColumn, new Filtering($filters));
 				if ($row !== NULL && $targetResultProxy === NULL) {
 					$targetResultProxy = $row->getResultProxy();
@@ -109,9 +109,6 @@ class Entity extends LeanMapper\Entity
 			} else {
 				$rows = $resultRows;
 			}
-
-		} else {
-			throw new InvalidRelationshipException('Only BelongsToMany and HasMany relationships are supported when querying entity property. ' . get_class($relationship) . ' given.');
 		}
 		$entities = [];
 		$table = $mapper->getTable($class);

@@ -6,11 +6,8 @@
  * Copyright (c) 2013 Michal Bohuslávek
  */
 
-namespace LeanMapperQuery\Exception;
+namespace LeanMapperQuery\QueryTarget;
 
-/**
- * @internal
- */
-class InvalidStrategyException extends Exception
+class HasManyTargetTable implements ITarget
 {
 }

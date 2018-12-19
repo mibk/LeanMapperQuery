@@ -20,7 +20,13 @@ interface IQuery
 	/**
 	 * @param  Fluent  $fluent
 	 * @param  IMapper $mapper
+	 * @param  QueryTarget\ITarget|NULL $target
 	 * @return Fluent
 	 */
-	public function applyQuery(Fluent $fluent, IMapper $mapper);
+	public function applyQuery(Fluent $fluent, IMapper $mapper, QueryTarget\ITarget $target = NULL);
+
+	/**
+	 * @return string
+	 */
+	public function getStrategy();
 }

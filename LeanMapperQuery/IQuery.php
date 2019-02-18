@@ -13,6 +13,7 @@ use LeanMapper\IMapper;
 
 /**
  * @author Michal Bohuslávek
+ * @deprecated use Query instead; the IQuery interface might get removed in the future
  */
 interface IQuery
 {

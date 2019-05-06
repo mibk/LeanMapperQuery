@@ -25,12 +25,12 @@ use LeanMapperQuery\Exception\NotImplementedException;
 /**
  * @author Michal Bohuslávek
  *
- * @method Query where($cond)
- * @method Query orderBy($field)
- * @method Query asc(bool $asc = TRUE)
- * @method Query desc(bool $desc = TRUE)
- * @method Query limit(int $limit)
- * @method Query offset(int $offset)
+ * @method $this where($cond, ...$args)
+ * @method $this orderBy($field)
+ * @method $this asc(bool $asc = TRUE)
+ * @method $this desc(bool $desc = TRUE)
+ * @method $this limit(int $limit)
+ * @method $this offset(int $offset)
  */
 class Query implements IQuery, \Iterator
 {

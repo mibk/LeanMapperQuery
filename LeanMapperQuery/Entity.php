@@ -62,6 +62,7 @@ class Entity extends LeanMapper\Entity
 			$strategy = $query->getStrategy();
 		}
 
+		$rows = [];
 		if ($relationship instanceof Relationship\BelongsToMany) {
 			$filters[] = function (Fluent $fluent) use ($mapper, $query) {
 				$query->applyQuery($fluent, $mapper);

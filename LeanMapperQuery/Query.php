@@ -337,7 +337,12 @@ class Query implements IQuery, \Iterator
 			"'" => FALSE,
 		];
 		$output = '';
+		$properties = [];
 		$property = NULL;
+		$propertyName = NULL;
+		$tableNameAlias = NULL;
+		$tableName = NULL;
+		$entityClass = NULL;
 		$firstLetter = TRUE;
 		for ($i = 0; $i < strlen($statement) + 1; $i++) {
 			// Do one more loop due to succesfuly translating
@@ -438,7 +443,7 @@ class Query implements IQuery, \Iterator
 	////////////////////////////////////////////////////
 
 	/**
-	 * @param  string
+	 * @param  string $entityClass
 	 * @return self
 	 */
 	public function cast($entityClass)

@@ -18,7 +18,7 @@ const FILTER = '1 = 1';
 
 class FilterMapper extends TestMapper
 {
-	public function getImplicitFilters($entityClass, Caller $caller = NULL)
+	public function getImplicitFilters($entityClass, Caller $caller = null)
 	{
 		return new ImplicitFilters(function (Fluent $statement) use ($entityClass) {
 			$entityClass === 'Book' && $statement->join('test')->on('[book].[id] = [test].[book_id]');
@@ -29,12 +29,12 @@ class FilterMapper extends TestMapper
 
 /**
  * @property int         $id
- * @property Author      $author      m:hasOne
- * @property Author|NULL $reviewer    m:hasOne(reviewer_id)
+ * @property Author      $author   m:hasOne
+ * @property Author|null $reviewer m:hasOne(reviewer_id)
  * @property string      $pubdate
  * @property string      $name
- * @property string|NULL $description
- * @property string|NULL $website
+ * @property string|null $description
+ * @property string|null $website
  * @property bool        $available
  */
 class Book extends Entity
@@ -46,7 +46,7 @@ class Book extends Entity
  * @property string      $name
  * @property Book[]      $books         m:belongsToMany
  * @property Book[]      $reviewedBooks m:belongsToMany(reviewer_id)
- * @property string|NULL $web
+ * @property string|null $web
  */
 class Author extends Entity
 {

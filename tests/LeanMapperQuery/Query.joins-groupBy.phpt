@@ -20,13 +20,13 @@ class Tag extends Entity
 
 /**
  * @property int         $id
- * @property Author      $author      m:hasOne
- * @property Author|NULL $reviewer    m:hasOne(reviewer_id)
- * @property Borrowing[] $borrowings  m:belongsToMany
+ * @property Author      $author     m:hasOne
+ * @property Author|null $reviewer   m:hasOne(reviewer_id)
+ * @property Borrowing[] $borrowings m:belongsToMany
  * @property string      $pubdate
  * @property string      $name
- * @property string|NULL $description
- * @property string|NULL $website
+ * @property string|null $description
+ * @property string|null $website
  * @property bool        $available
  */
 class Book extends Entity
@@ -34,9 +34,9 @@ class Book extends Entity
 }
 
 /**
- * @property int         $id
- * @property Book        $book      m:hasOne
- * @property string      $date
+ * @property int    $id
+ * @property Book   $book m:hasOne
+ * @property string $date
  */
 class Borrowing extends Entity
 {
@@ -47,7 +47,7 @@ class Borrowing extends Entity
  * @property string      $name
  * @property Book[]      $books         m:belongsToMany
  * @property Book[]      $reviewedBooks m:belongsToMany(reviewer_id)
- * @property string|NULL $web
+ * @property string|null $web
  */
 class Author extends Entity
 {

@@ -34,7 +34,7 @@ class TestQuery extends Query
 /**
  * @property int         $id
  * @property string      $name
- * @property string|NULL $website
+ * @property string|null $website
  * @property bool        $available
  */
 class Book extends Entity

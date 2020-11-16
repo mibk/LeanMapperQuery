@@ -133,7 +133,7 @@ class BookQuery extends LeanMapperQuery\Query
 {
 	public function restrictAvailable()
 	{
-		$this->where('@available', TRUE)
+		$this->where('@available', true)
 			->orderBy('@author.name');
 		return $this;
 	}

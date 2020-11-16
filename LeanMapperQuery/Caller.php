@@ -17,7 +17,7 @@ namespace LeanMapperQuery;
  * b) caller is instance of this class
  *   (LeanMapperQuery\Caller):
  *   3) caller is query object
- *   4) if method self::isEntity return TRUE,
+ *   4) if method self::isEntity returns true,
  *     caller is query object via entity
  *
  * @author Michal Bohuslávek

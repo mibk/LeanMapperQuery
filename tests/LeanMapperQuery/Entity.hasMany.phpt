@@ -79,7 +79,8 @@ function extractTags(BookRepository $bookRepository, $tagProperty, Query $query)
 ////////////////
 
 $query = getQuery()
-	->limit(1);
+	->limit(1)
+	->offset(0); // workaround for Dibi 3.x
 
 $expected = [
 	1 => 'popular',
@@ -117,6 +118,7 @@ Assert::same($sqls, [
 ////////////////
 
 $query = getQuery()
+	->limit(99) // workaround for Dibi 3.x
 	->offset(1);
 
 $expected = [
@@ -133,20 +135,20 @@ Assert::same($expected, extractTags($bookRepository, 'tagsUnion', $query));
 Assert::same($sqls, [
 	'SELECT [book].* FROM [book]',
 	'SELECT * FROM (' . implode(') UNION SELECT * FROM (', [
-		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 LIMIT -1 OFFSET 1',
-		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 LIMIT -1 OFFSET 1',
-		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 LIMIT -1 OFFSET 1',
-		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 LIMIT -1 OFFSET 1',
-		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 LIMIT -1 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 LIMIT 99 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 LIMIT 99 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 LIMIT 99 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 LIMIT 99 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 LIMIT 99 OFFSET 1',
 	]) . ')',
 	'SELECT [tag].* FROM [tag] WHERE [tag].[id] IN (2)',
 	'SELECT [book].* FROM [book]',
 	'SELECT * FROM (' . implode(') UNION SELECT * FROM (', [
-		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 LIMIT -1 OFFSET 1',
-		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 LIMIT -1 OFFSET 1',
-		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 LIMIT -1 OFFSET 1',
-		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 LIMIT -1 OFFSET 1',
-		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 LIMIT -1 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 1 LIMIT 99 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 2 LIMIT 99 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 3 LIMIT 99 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 4 LIMIT 99 OFFSET 1',
+		'SELECT [book_tag].* FROM [book_tag] LEFT JOIN [tag] ON [book_tag].[tag_id] = [tag].[id] WHERE [book_tag].[book_id] = 5 LIMIT 99 OFFSET 1',
 	]) . ')',
 	'SELECT [tag].* FROM [tag] WHERE [tag].[id] IN (2)',
 ]);
@@ -156,7 +158,8 @@ Assert::same($sqls, [
 
 $query = getQuery()
 	->orderBy('@name')
-	->limit(1);
+	->limit(1)
+	->offset(0); // workaround for Dibi 3.x
 
 $expected = [
 	1 => 'ebook',
@@ -195,7 +198,8 @@ Assert::same($sqls, [
 
 $query = getQuery()
 	->where('@name', 'ebook')
-	->limit(1);
+	->limit(1)
+	->offset(0); // workaround for Dibi 3.x
 
 $expected = [
 	1 => 'ebook',

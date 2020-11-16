@@ -266,7 +266,7 @@ class Query implements IQuery, \Iterator
 			$targetTableAlias = $this->joinRelatedTable($relationshipTableAlias, $targetReferencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters, false);
 
 		} else {
-			throw new InvalidRelationshipException('Unknown relationship type. ' . get_class($relationship) . ' given.');
+			throw new InvalidRelationshipException('Unknown relationship type in property {$property->getName()}.');
 		}
 		$currentTable = $targetTable;
 		$currentTableAlias = $targetTableAlias;

@@ -98,7 +98,9 @@ class Entity extends LeanMapper\Entity
 				if ($row !== null && $targetResultProxy === null) {
 					$targetResultProxy = $row->getResultProxy();
 				}
-				$row !== null && $resultRows[$row->{$targetPrimaryKey}] = $row;
+				if ($row !== null) {
+					$resultRows[$row->{$targetPrimaryKey}] = $row;
+				}
 			}
 
 			if ($targetResultProxy) {

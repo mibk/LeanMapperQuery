@@ -46,13 +46,13 @@ class Tag extends BaseEntity
 
 /**
  * @property int         $id
- * @property Author      $author      m:hasOne
- * @property Author|NULL $reviewer    m:hasOne(reviewer_id)
- * @property Tag[]       $tags        m:hasMany
+ * @property Author      $author   m:hasOne
+ * @property Author|null $reviewer m:hasOne(reviewer_id)
+ * @property Tag[]       $tags     m:hasMany
  * @property string      $pubdate
  * @property string      $name
- * @property string|NULL $description
- * @property string|NULL $website
+ * @property string|null $description
+ * @property string|null $website
  * @property bool        $available
  */
 class Book extends BaseEntity
@@ -64,7 +64,7 @@ class Book extends BaseEntity
  * @property string      $name
  * @property Book[]      $books         m:belongsToMany
  * @property Book[]      $reviewedBooks m:belongsToMany(reviewer_id)
- * @property string|NULL $web
+ * @property string|null $web
  */
 class Author extends BaseEntity
 {
@@ -93,7 +93,7 @@ $authors = $authorRepository->findAll();
 $author = $authors[1];
 
 $authorBooks = $author->find('books', getQuery()
-	->where('@available', FALSE)
+	->where('@available', false)
 );
 
 Assert::same(0, count($authorBooks));

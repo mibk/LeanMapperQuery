@@ -44,17 +44,17 @@ class Tag extends BaseEntity
 }
 
 /**
- * @property int         $id
- * @property Tag[]       $tags        m:hasMany(#union)
- * @property string      $name
+ * @property int    $id
+ * @property Tag[]  $tags m:hasMany(#union)
+ * @property string $name
  */
 class Book extends BaseEntity
 {
 }
 
 /**
- * @property int         $id
- * @property Book[]      $books         m:belongsToMany(#union)
+ * @property int    $id
+ * @property Book[] $books m:belongsToMany(#union)
  */
 class Author extends BaseEntity
 {
@@ -74,14 +74,14 @@ foreach ($authors as $author) {
 	);
 
 	$book = reset($books);
-	$result[$author->id] = $book ? $book->name : NULL;
+	$result[$author->id] = $book ? $book->name : null;
 }
 
 Assert::same([
 	1 => 'The Pragmatic Programmer',
 	2 => 'The Art of Computer Programming',
 	3 => 'Refactoring: Improving the Design of Existing Code',
-	4 => NULL,
+	4 => null,
 	5 => 'Introduction to Algorithms',
 ], $result);
 

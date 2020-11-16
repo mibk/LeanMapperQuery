@@ -27,8 +27,8 @@ use LeanMapperQuery\Exception\NotImplementedException;
  *
  * @method $this where($cond, ...$args)
  * @method $this orderBy($field)
- * @method $this asc(bool $asc = TRUE)
- * @method $this desc(bool $desc = TRUE)
+ * @method $this asc(bool $asc = true)
+ * @method $this desc(bool $desc = true)
  * @method $this limit(int $limit)
  * @method $this offset(int $offset)
  */
@@ -61,14 +61,14 @@ class Query implements IQuery, \Iterator
 
 	////////////////////////////////////////////////////
 
-	/** @var string|NULL */
-	private $castedEntityClass = NULL;
+	/** @var string|null */
+	private $castedEntityClass = null;
 
 	/** @var string */
 	protected $sourceTableName;
 
-	/** @var Fluent|NULL */
-	private $fluent = NULL;
+	/** @var Fluent|null */
+	private $fluent = null;
 
 	/** @var IMapper */
 	protected $mapper;
@@ -77,7 +77,7 @@ class Query implements IQuery, \Iterator
 	 * Whether to use dumb replacing of placeholders globally.
 	 * @var boolean
 	 */
-	protected $replacePlaceholders = FALSE;
+	protected $replacePlaceholders = false;
 
 	/** @var array */
 	private $queue = [];
@@ -88,8 +88,8 @@ class Query implements IQuery, \Iterator
 	/** @var array */
 	private $tablesAliases;
 
-	/** @var array|NULL */
-	private $possibleJoin = NULL;
+	/** @var array|null */
+	private $possibleJoin = null;
 
 	/** @var array */
 	private $joinAlternative = [];
@@ -111,7 +111,7 @@ class Query implements IQuery, \Iterator
 	}
 
 	/**
-	 * Returns TRUE if the $targetTable is already joined.
+	 * Returns true if $targetTable is already joined.
 	 * @param  string $currentTable
 	 * @param  string $targetTable
 	 * @param  string $viaColumn
@@ -126,7 +126,7 @@ class Query implements IQuery, \Iterator
 		$globalKey = $currentTable . '_' . $localKey;
 		if (array_key_exists($globalKey, $this->tablesAliases)) {
 			$alias = $this->tablesAliases[$globalKey];
-			return TRUE;
+			return true;
 		}
 		// Find the tiniest unique table alias.
 		if (!in_array($targetTable, $this->tablesAliases)) {
@@ -136,7 +136,7 @@ class Query implements IQuery, \Iterator
 		} else {
 			$alias = $globalKey;
 		}
-		return FALSE;
+		return false;
 	}
 
 	private function registerTableAlias($globalKey, $alias)
@@ -149,7 +149,7 @@ class Query implements IQuery, \Iterator
 
 	private function registerJoin($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $globalKey, $alias)
 	{
-		if ($this->possibleJoin !== NULL) {
+		if ($this->possibleJoin !== null) {
 			throw new InvalidStateException('Cannot register new join. There is one registered already.');
 		}
 		$this->possibleJoin = func_get_args();
@@ -158,24 +158,24 @@ class Query implements IQuery, \Iterator
 
 	private function triggerJoin()
 	{
-		if ($this->possibleJoin !== NULL) {
+		if ($this->possibleJoin !== null) {
 			list($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $globalKey, $alias) = $this->possibleJoin;
 			$this->fluent->leftJoin("[$targetTable]" . ($targetTable !== $alias ? " [$alias]" : ''))
 				->on("[$currentTable].[$referencingColumn] = [$alias].[$targetTablePrimaryKey]");
 			$this->tryAddGroupBy($this->fluent, $currentTable);
 			$this->registerTableAlias($globalKey, $alias);
-			$this->possibleJoin = NULL;
+			$this->possibleJoin = null;
 		}
 	}
 
 	/**
 	 * Dismisses the join and returns alternative table
 	 * and column names.
-	 * @return array(string, string)
+	 * @return array{0: string, 1: string}
 	 */
 	private function dismissJoin()
 	{
-		$this->possibleJoin = NULL;
+		$this->possibleJoin = null;
 		return $this->joinAlternative;
 	}
 
@@ -184,10 +184,10 @@ class Query implements IQuery, \Iterator
 	 */
 	private function pendingJoin()
 	{
-		return $this->possibleJoin !== NULL;
+		return $this->possibleJoin !== null;
 	}
 
-	private function joinRelatedTable($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $filters = [], $joinImmediately = TRUE)
+	private function joinRelatedTable($currentTable, $referencingColumn, $targetTable, $targetTablePrimaryKey, $filters = [], $joinImmediately = true)
 	{
 		// Join if not already joined.
 		if (!$this->getTableAlias($currentTable, $targetTable, $referencingColumn, $globalKey, $alias)) {
@@ -243,7 +243,7 @@ class Query implements IQuery, \Iterator
 			$targetTablePrimaryKey = $this->mapper->getPrimaryKey($targetTable);
 			$referencingColumn = $relationship->getColumnReferencingTargetTable();
 			// Join table.
-			$targetTableAlias = $this->joinRelatedTable($currentTableAlias, $referencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters, FALSE);
+			$targetTableAlias = $this->joinRelatedTable($currentTableAlias, $referencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters, false);
 
 		} elseif ($relationship instanceof Relationship\BelongsTo) { // BelongsToOne, BelongsToMany
 			$targetTable = $relationship->getTargetTable();
@@ -263,7 +263,7 @@ class Query implements IQuery, \Iterator
 			// Join tables.
 			// Don't apply filters on relationship table.
 			$relationshipTableAlias = $this->joinRelatedTable($currentTableAlias, $sourceTablePrimaryKey, $relationshipTable, $sourceReferencingColumn);
-			$targetTableAlias = $this->joinRelatedTable($relationshipTableAlias, $targetReferencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters, FALSE);
+			$targetTableAlias = $this->joinRelatedTable($relationshipTableAlias, $targetReferencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters, false);
 
 		} else {
 			throw new InvalidRelationshipException('Unknown relationship type. ' . get_class($relationship) . ' given.');
@@ -315,12 +315,12 @@ class Query implements IQuery, \Iterator
 	 * @throws MemberAccessException
 	 * @throws InvalidStateException
 	 */
-	protected function parseStatement($statement, $replacePlaceholders = NULL)
+	protected function parseStatement($statement, $replacePlaceholders = null)
 	{
 		if (!is_string($statement)) {
 			throw new InvalidArgumentException('Type of argument $statement is expected to be string. ' . gettype($statement) . ' given.');
 		}
-		$replacePlaceholders === NULL && $replacePlaceholders = (bool) $this->replacePlaceholders;
+		$replacePlaceholders === null && $replacePlaceholders = (bool) $this->replacePlaceholders;
 
 		$rootTableName = $this->sourceTableName;
 
@@ -332,28 +332,28 @@ class Query implements IQuery, \Iterator
 		}
 
 		$switches = [
-			'@' => FALSE,
-			'"' => FALSE,
-			"'" => FALSE,
+			'@' => false,
+			'"' => false,
+			"'" => false,
 		];
 		$output = '';
 		$properties = [];
-		$property = NULL;
-		$propertyName = NULL;
-		$tableNameAlias = NULL;
-		$tableName = NULL;
-		$entityClass = NULL;
-		$firstLetter = TRUE;
+		$property = null;
+		$propertyName = null;
+		$tableNameAlias = null;
+		$tableName = null;
+		$entityClass = null;
+		$firstLetter = true;
 		for ($i = 0; $i < strlen($statement) + 1; $i++) {
 			// Do one more loop due to succesfuly translating
 			// properties attached to the end of the statement.
 			$ch = isset($statement[$i]) ? $statement[$i] : '';
-			if ($switches['@'] === TRUE) {
+			if ($switches['@'] === true) {
 				if (preg_match('#^'.($firstLetter ? self::$variablePatternFirstLetter : self::$variablePatternOtherLetters).'$#', $ch)) {
 					$propertyName .= $ch;
-					$firstLetter = FALSE;
+					$firstLetter = false;
 				} else {
-					$firstLetter = TRUE;
+					$firstLetter = true;
 					if (!array_key_exists($propertyName, $properties)) {
 						throw new MemberAccessException("Entity '$entityClass' doesn't have property '$propertyName'.");
 					}
@@ -371,7 +371,7 @@ class Query implements IQuery, \Iterator
 							$this->triggerJoin();
 							list($entityClass, $properties) = $this->traverseToRelatedEntity($tableName, $tableNameAlias, $property);
 							$column = $this->mapper->getPrimaryKey($tableName);
-							$property = NULL;
+							$property = null;
 							foreach ($properties as $prop) {
 								if ($prop->getColumn() === $column) {
 									$property = $prop;
@@ -382,7 +382,7 @@ class Query implements IQuery, \Iterator
 							}
 						} else {
 							$column = $property->getColumn();
-							if ($column === NULL) {
+							if ($column === null) {
 								throw new InvalidStateException("Column not specified in property '$propertyName' from entity '$entityClass'.");
 							}
 						}
@@ -394,19 +394,19 @@ class Query implements IQuery, \Iterator
 							$this->triggerJoin();
 						}
 						$output .= "[$tableNameAlias].[$column]";
-						$switches['@'] = FALSE;
+						$switches['@'] = false;
 						$output .= $ch;
 					}
 				}
-			} elseif ($ch === '@' && $switches["'"] === FALSE && $switches['"'] === FALSE) {
-				$switches['@'] = TRUE;
+			} elseif ($ch === '@' && $switches["'"] === false && $switches['"'] === false) {
+				$switches['@'] = true;
 				$propertyName = '';
 				$properties = $rootProperties;
 				$tableNameAlias = $tableName = $rootTableName;
 				$entityClass = $rootEntityClass;
 
-			} elseif ($replacePlaceholders && $ch === self::$defaultPlaceholder && $switches["'"] === FALSE && $switches['"'] === FALSE) {
-				if ($property === NULL) {
+			} elseif ($replacePlaceholders && $ch === self::$defaultPlaceholder && $switches["'"] === false && $switches['"'] === false) {
+				if ($property === null) {
 					$output .= $ch;
 				} else {
 					// Dumb replacing of the placeholder.
@@ -415,9 +415,9 @@ class Query implements IQuery, \Iterator
 					$output .= $this->replacePlaceholder($property);
 				}
 			} else {
-				if ($ch === '"' && $switches["'"] === FALSE) {
+				if ($ch === '"' && $switches["'"] === false) {
 					$switches['"'] = !$switches['"'];
-				} elseif ($ch === "'" && $switches['"'] === FALSE) {
+				} elseif ($ch === "'" && $switches['"'] === false) {
 					$switches["'"] = !$switches["'"];
 				}
 				$output .= $ch;
@@ -434,7 +434,7 @@ class Query implements IQuery, \Iterator
 	 */
 	protected function getFluent()
 	{
-		if ($this->fluent === NULL) {
+		if ($this->fluent === null) {
 			throw new InvalidStateException('getFluent() method could be only called within command<name>() methods.');
 		}
 		return $this->fluent;
@@ -448,7 +448,7 @@ class Query implements IQuery, \Iterator
 	 */
 	public function cast($entityClass)
 	{
-		if ($this->castedEntityClass !== NULL) {
+		if ($this->castedEntityClass !== null) {
 			throw new InvalidStateException("Entity class is already casted to {$this->castedEntityClass} class.");
 		}
 		$this->castedEntityClass = $entityClass;
@@ -457,11 +457,11 @@ class Query implements IQuery, \Iterator
 
 	/**
 	 * @inheritdoc
-	 * @throws     InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
-	public function applyQuery(Fluent $fluent, IMapper $mapper, QueryTarget\ITarget $target = NULL)
+	public function applyQuery(Fluent $fluent, IMapper $mapper, QueryTarget\ITarget $target = null)
 	{
-		$targetTable = NULL;
+		$targetTable = null;
 
 		if ($target instanceof QueryTarget\HasManyRelationshipTable) {
 			$targetTable = $target->getRelationship()->getTargetTable();
@@ -486,14 +486,14 @@ class Query implements IQuery, \Iterator
 			$fluent->removeClause('LIMIT');
 			$fluent->removeClause('OFFSET');
 
-		} elseif ($target !== NULL) {
+		} elseif ($target !== null) {
 			throw new InvalidArgumentException('Unsupported query target.');
 		}
 
 		return $fluent;
 	}
 
-	private function apply(Fluent $fluent, IMapper $mapper, $sourceTableName = NULL)
+	private function apply(Fluent $fluent, IMapper $mapper, $sourceTableName = null)
 	{
 		// NOTE:
 		// $fluent is expected to have called method Fluent::from
@@ -512,7 +512,7 @@ class Query implements IQuery, \Iterator
 		if (count($fromClause) < 3 || $fromClause[1] !== '%n') {
 			throw new InvalidArgumentException('Unsupported fluent from clause. Only pure table name as an argument of \\LeanMapper\\Fluent::from method is supported.');
 		}
-		$this->sourceTableName = $sourceTableName !== NULL ? $sourceTableName : $fromClause[2];
+		$this->sourceTableName = $sourceTableName !== null ? $sourceTableName : $fromClause[2];
 		if (count($fromClause) > 3) { // complicated from clause
 			$subFluent = clone $fluent;
 			// Reset fluent.
@@ -528,10 +528,10 @@ class Query implements IQuery, \Iterator
 		$this->fluent = $fluent;
 		$this->mapper = $mapper;
 
-		if ($this->castedEntityClass !== NULL) {
+		if ($this->castedEntityClass !== null) {
 			$rootEntityClass = $this->mapper->getEntityClass($this->sourceTableName);
 
-			if (!is_a($this->castedEntityClass, $rootEntityClass, TRUE)) {
+			if (!is_a($this->castedEntityClass, $rootEntityClass, true)) {
 				throw new InvalidArgumentException("Query object is limited to {$this->castedEntityClass} entity, {$rootEntityClass} entity used.");
 			}
 
@@ -550,7 +550,7 @@ class Query implements IQuery, \Iterator
 		}
 
 		// Reset fluent.
-		$this->fluent = NULL;
+		$this->fluent = null;
 		return $fluent;
 	}
 
@@ -604,13 +604,13 @@ class Query implements IQuery, \Iterator
 				}
 			}
 		} else {
-			$replacePlaceholders = NULL;
+			$replacePlaceholders = null;
 			$args = func_get_args();
 			$operators = ['=', '<>', '!=', '<=>', '<', '<=', '>', '>='];
 			$variablePattern = self::$variablePatternFirstLetter . self::$variablePatternOtherLetters . '*';
 			if (count($args) === 2
 				&& preg_match('#^\s*(@(?:'.$variablePattern.'|\.)*'.$variablePattern.')\s*(|'.implode('|', $operators).')\s*(?:\?\s*)?$#', $args[0], $matches)) {
-				$replacePlaceholders = TRUE;
+				$replacePlaceholders = true;
 				$field = &$args[0];
 				list(, $field, $operator) = $matches;
 				$value = &$args[1];
@@ -621,7 +621,7 @@ class Query implements IQuery, \Iterator
 						$value = $this->replaceEntitiesForItsPrimaryKeyValues($value);
 						$operator = 'IN';
 						$placeholder = '%in';
-					} elseif ($value === NULL) {
+					} elseif ($value === null) {
 						$operator = 'IS';
 						$placeholder = 'NULL';
 						unset($args[1]);
@@ -670,12 +670,12 @@ class Query implements IQuery, \Iterator
 		}
 	}
 
-	private function commandAsc($asc = TRUE)
+	private function commandAsc($asc = true)
 	{
 		$this->fluent->{$asc ? 'asc' : 'desc'}();
 	}
 
-	private function commandDesc($desc = TRUE)
+	private function commandDesc($desc = true)
 	{
 		$this->commandAsc(!$desc);
 	}

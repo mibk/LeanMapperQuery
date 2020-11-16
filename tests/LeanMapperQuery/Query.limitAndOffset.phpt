@@ -9,7 +9,7 @@ use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
 
-const LIMIT = 10;
+const LIMIT  = 10;
 const OFFSET = 50;
 
 $fluent = getFluent('book');

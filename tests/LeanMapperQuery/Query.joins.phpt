@@ -37,13 +37,13 @@ class Tag extends Entity
 
 /**
  * @property int         $id
- * @property Author      $author      m:hasOne
- * @property Author|NULL $reviewer    m:hasOne(reviewer_id)
- * @property Tag[]       $tags        m:hasMany
+ * @property Author      $author   m:hasOne
+ * @property Author|null $reviewer m:hasOne(reviewer_id)
+ * @property Tag[]       $tags     m:hasMany
  * @property string      $pubdate
  * @property string      $name
- * @property string|NULL $description
- * @property string|NULL $website
+ * @property string|null $description
+ * @property string|null $website
  * @property bool        $available
  */
 class Book extends Entity
@@ -51,12 +51,12 @@ class Book extends Entity
 }
 
 /**
- * @property int         $id            (id_author)
+ * @property int         $id (id_author)
  * @property string      $name
  * @property Book[]      $books         m:belongsToMany
  * @property Book[]      $reviewedBooks m:belongsToMany(reviewer_id)
  * @property Foo         $foo           m:hasOne
- * @property string|NULL $web
+ * @property string|null $web
  */
 class Author extends Entity
 {
@@ -86,7 +86,7 @@ Assert::same((string) $expected, (string) $fluent);
 // BelongsTo relationship
 $fluent = getFluent('author');
 getQuery()
-	->where('@books.available', TRUE)
+	->where('@books.available', true)
 	->applyQuery($fluent, $mapper);
 
 $expected = getFluent('author')

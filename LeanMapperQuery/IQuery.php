@@ -12,19 +12,19 @@ use LeanMapper\Fluent;
 use LeanMapper\IMapper;
 
 /**
- * @author Michal Bohuslávek
+ * @author     Michal Bohuslávek
  * @deprecated use Query instead; the IQuery interface might get removed in the future
  */
 interface IQuery
 {
 
 	/**
-	 * @param  Fluent  $fluent
-	 * @param  IMapper $mapper
-	 * @param  QueryTarget\ITarget|NULL $target
+	 * @param  Fluent                   $fluent
+	 * @param  IMapper                  $mapper
+	 * @param  QueryTarget\ITarget|null $target
 	 * @return Fluent
 	 */
-	public function applyQuery(Fluent $fluent, IMapper $mapper, QueryTarget\ITarget $target = NULL);
+	public function applyQuery(Fluent $fluent, IMapper $mapper, QueryTarget\ITarget $target = null);
 
 	/**
 	 * @return string

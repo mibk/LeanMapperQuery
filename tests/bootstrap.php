@@ -16,7 +16,7 @@ date_default_timezone_set('Europe/Prague');
 
 class TestMapper extends DefaultMapper
 {
-	protected $defaultEntityNamespace = NULL;
+	protected $defaultEntityNamespace = null;
 }
 
 $connection = new Connection([
@@ -27,19 +27,16 @@ $connection = new Connection([
 $mapper = new TestMapper;
 $entityFactory = new DefaultEntityFactory;
 
-function getFluent($table)
-{
+function getFluent($table) {
 	global $connection;
 	$fluent = new Fluent($connection);
 	return $fluent->select('%n.*', $table)->from($table);
 }
 
-function getQuery()
-{
+function getQuery() {
 	return new Query;
 }
 
-function id($instance)
-{
+function id($instance) {
 	return $instance;
 }

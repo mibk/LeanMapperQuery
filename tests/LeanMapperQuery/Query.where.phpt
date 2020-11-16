@@ -17,11 +17,11 @@ class OtherDateTime extends DateTime
 
 /**
  * @property int           $id
- * @property Tag[]         $tags      m:hasMany
- * @property DateTime      $pubdate   m:type(date)
+ * @property Tag[]         $tags    m:hasMany
+ * @property DateTime      $pubdate m:type(date)
  * @property OtherDateTime $created
  * @property string        $name
- * @property string|NULL   $website
+ * @property string|null   $website
  * @property bool          $available
  */
 class Book extends Entity
@@ -45,14 +45,14 @@ getQuery()
 	->where('@id', 1)
 	->where('@pubdate', $datetime)
 	->where('@created <', $datetime)
-	->where('@available =', FALSE)
+	->where('@available =', false)
 	->applyQuery($fluent, $mapper);
 
 $expected = getFluent('book')
 	->where('([book].[id] = %i)', 1)
 	->where('([book].[pubdate] = %d)', $datetime)
 	->where('([book].[created] < %t)', $datetime)
-	->where('([book].[available] = %b)', FALSE);
+	->where('([book].[available] = %b)', false);
 
 Assert::same($expected->_export(), $fluent->_export());
 
@@ -63,14 +63,14 @@ getQuery()
 	->where('@id = ?', 1)
 	->where('@pubdate = ?', $datetime)
 	->where('@created < ?', $datetime)
-	->where('@available = ?', FALSE)
+	->where('@available = ?', false)
 	->applyQuery($fluent, $mapper);
 
 $expected = getFluent('book')
 	->where('([book].[id] = %i)', 1)
 	->where('([book].[pubdate] = %d)', $datetime)
 	->where('([book].[created] < %t)', $datetime)
-	->where('([book].[available] = %b)', FALSE);
+	->where('([book].[available] = %b)', false);
 
 Assert::same($expected->_export(), $fluent->_export());
 
@@ -78,7 +78,7 @@ $fluent = getFluent('book');
 $bookNames = ['PHP', 'Javascript'];
 getQuery()
 	->where('@name', $bookNames)
-	->where('@website', NULL)
+	->where('@website', null)
 	->applyQuery($fluent, $mapper);
 
 $expected = getFluent('book')
@@ -101,13 +101,13 @@ $fluent = getFluent('book');
 getQuery()
 	->where([
 		'@name' => $bookNames,
-		'@available' => FALSE,
+		'@available' => false,
 	])
 	->applyQuery($fluent, $mapper);
 
 $expected = getFluent('book')
 	->where('([book].[name] IN %in)', $bookNames)
-	->where('([book].[available] = %b)', FALSE);
+	->where('([book].[available] = %b)', false);
 
 Assert::same($expected->_export(), $fluent->_export());
 

@@ -40,7 +40,7 @@ class BookRepository extends Repository
 			->from($this->getTable())
 			->where('%n = ?', $this->mapper->getPrimaryKey($this->getTable()), $id)
 			->fetch();
-		if ($row === FALSE) {
+		if ($row === false) {
 			return $row;
 		}
 		return $this->createEntity($row);

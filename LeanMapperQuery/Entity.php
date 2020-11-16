@@ -41,7 +41,7 @@ class Entity extends LeanMapper\Entity
 			throw new InvalidStateException('Cannot query detached entity.');
 		}
 		$property = $entity->getCurrentReflection()->getEntityProperty($field);
-		if ($property === NULL) {
+		if ($property === null) {
 			throw new MemberAccessException("Cannot access undefined property '$field' in entity " . get_called_class() . '.');
 		}
 		if (!$property->hasRelationship()) {
@@ -84,8 +84,8 @@ class Entity extends LeanMapper\Entity
 			$targetPrimaryKey = $mapper->getPrimaryKey($targetTable);
 			$rows = [];
 			$resultRows = [];
-			$targetResultProxy = NULL;
-			$relationshipFiltering = NULL;
+			$targetResultProxy = null;
+			$relationshipFiltering = null;
 
 			if ($strategy === Result::STRATEGY_UNION) {
 				$relationshipFiltering = new Filtering(function (Fluent $fluent) use ($mapper, $query, $relationship) {
@@ -95,10 +95,10 @@ class Entity extends LeanMapper\Entity
 
 			foreach ($entity->row->referencing($relationshipTable, $sourceReferencingColumn, $relationshipFiltering, $strategy) as $relationship) {
 				$row = $relationship->referenced($targetTable, $targetReferencingColumn, new Filtering($filters));
-				if ($row !== NULL && $targetResultProxy === NULL) {
+				if ($row !== null && $targetResultProxy === null) {
 					$targetResultProxy = $row->getResultProxy();
 				}
-				$row !== NULL && $resultRows[$row->{$targetPrimaryKey}] = $row;
+				$row !== null && $resultRows[$row->{$targetPrimaryKey}] = $row;
 			}
 
 			if ($targetResultProxy) {

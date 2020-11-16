@@ -37,10 +37,10 @@ class Tag extends BaseEntity
 }
 
 /**
- * @property int         $id
- * @property Tag[]       $tagsIn      m:hasMany
- * @property-read Tag[]  $tagsUnion   m:hasMany(#union)
- * @property string      $name
+ * @property      int    $id
+ * @property      Tag[]  $tagsIn    m:hasMany
+ * @property-read Tag[]  $tagsUnion m:hasMany(#union)
+ * @property      string $name
  */
 class Book extends BaseEntity
 {
@@ -54,8 +54,7 @@ $connection->onEvent[] = function ($event) use (&$sqls) {
 };
 $bookRepository = new BookRepository($connection, $mapper, $entityFactory);
 
-function extractTags(BookRepository $bookRepository, $tagProperty, Query $query)
-{
+function extractTags(BookRepository $bookRepository, $tagProperty, Query $query) {
 	$result = [];
 
 	foreach ($bookRepository->findAll() as $book) {
@@ -63,7 +62,7 @@ function extractTags(BookRepository $bookRepository, $tagProperty, Query $query)
 
 		if (count($tags) <= 1) {
 			$tag = reset($tags);
-			$result[$book->id] = $tag ? $tag->name : NULL;
+			$result[$book->id] = $tag ? $tag->name : null;
 
 		} else {
 			foreach ($tags as $tag) {
@@ -75,7 +74,6 @@ function extractTags(BookRepository $bookRepository, $tagProperty, Query $query)
 	return $result;
 }
 
-
 ////////////////
 
 $query = getQuery()
@@ -84,10 +82,10 @@ $query = getQuery()
 
 $expected = [
 	1 => 'popular',
-	2 => NULL,
+	2 => null,
 	3 => 'ebook',
 	4 => 'popular',
-	5 => NULL,
+	5 => null,
 ];
 
 $sqls = [];
@@ -113,7 +111,6 @@ Assert::same($sqls, [
 	]) . ')',
 	'SELECT [tag].* FROM [tag] WHERE [tag].[id] IN (1, 2)',
 ]);
-
 
 ////////////////
 
@@ -123,10 +120,10 @@ $query = getQuery()
 
 $expected = [
 	1 => 'ebook',
-	2 => NULL,
-	3 => NULL,
-	4 => NULL,
-	5 => NULL,
+	2 => null,
+	3 => null,
+	4 => null,
+	5 => null,
 ];
 
 $sqls = [];
@@ -152,7 +149,6 @@ Assert::same($sqls, [
 	]) . ')',
 	'SELECT [tag].* FROM [tag] WHERE [tag].[id] IN (2)',
 ]);
-
 
 ////////////////
 
@@ -163,10 +159,10 @@ $query = getQuery()
 
 $expected = [
 	1 => 'ebook',
-	2 => NULL,
+	2 => null,
 	3 => 'ebook',
 	4 => 'popular',
-	5 => NULL,
+	5 => null,
 ];
 
 $sqls = [];
@@ -193,7 +189,6 @@ Assert::same($sqls, [
 	'SELECT [tag].* FROM [tag] WHERE [tag].[id] IN (2, 1) ORDER BY [tag].[name]',
 ]);
 
-
 ////////////////
 
 $query = getQuery()
@@ -203,10 +198,10 @@ $query = getQuery()
 
 $expected = [
 	1 => 'ebook',
-	2 => NULL,
+	2 => null,
 	3 => 'ebook',
-	4 => NULL,
-	5 => NULL,
+	4 => null,
+	5 => null,
 ];
 
 $sqls = [];

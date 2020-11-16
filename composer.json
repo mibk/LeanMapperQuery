@@ -9,6 +9,7 @@
 		}
 	],
 	"scripts": {
+		"test": "vendor/bin/tester tests -s",
 		"vet": "phpstan analyse -c phpstan.neon --no-progress --no-ansi --error-format raw"
 	},
 	"autoload": {
@@ -21,7 +22,7 @@
 		"tharos/leanmapper": ">=3.0"
 	},
 	"require-dev": {
-		"nette/tester": "~1.2",
+		"nette/tester": "~2.3.4",
 		"phpstan/phpstan": "0.12.55"
 	}
 }

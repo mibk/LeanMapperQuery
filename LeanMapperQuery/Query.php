@@ -347,7 +347,7 @@ class Query implements IQuery, \Iterator
 		for ($i = 0; $i < strlen($statement) + 1; $i++) {
 			// Do one more loop due to succesfuly translating
 			// properties attached to the end of the statement.
-			$ch = isset($statement{$i}) ? $statement{$i} : '';
+			$ch = isset($statement[$i]) ? $statement[$i] : '';
 			if ($switches['@'] === TRUE) {
 				if (preg_match('#^'.($firstLetter ? self::$variablePatternFirstLetter : self::$variablePatternOtherLetters).'$#', $ch)) {
 					$propertyName .= $ch;

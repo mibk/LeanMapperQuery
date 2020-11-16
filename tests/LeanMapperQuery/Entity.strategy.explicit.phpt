@@ -70,6 +70,7 @@ $result = [];
 foreach ($authors as $author) {
 	$books = $author->find('books', getQuery()
 		->limit(1)
+		->offset(0) // workaround for Dibi 3.x
 	);
 
 	$book = reset($books);

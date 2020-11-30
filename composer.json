@@ -18,7 +18,7 @@
 		}
 	},
 	"require": {
-		"php": ">=5.4.0",
+		"php": "^7.1 || ^8.0",
 		"tharos/leanmapper": ">=3.0"
 	},
 	"require-dev": {

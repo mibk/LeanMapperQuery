@@ -22,7 +22,7 @@ Installation
 It can be installed via [Composer](http://getcomposer.org/download).
 
 ```
-composer require mbohuslavek/leanmapper-query:@dev
+composer require mbohuslavek/leanmapper-query
 ```
 
 

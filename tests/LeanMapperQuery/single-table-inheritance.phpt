@@ -36,7 +36,7 @@ class BaseRepository extends Repository
 
 class ClientMapper extends TestMapper implements LeanMapperQuery\ICaster
 {
-	public function getEntityClass($table, LeanMapper\Row $row = null)
+	public function getEntityClass($table, LeanMapper\Row $row = null): string
 	{
 		if ($table === 'client') {
 			if (isset($row->type)) {
@@ -48,7 +48,7 @@ class ClientMapper extends TestMapper implements LeanMapperQuery\ICaster
 		return parent::getEntityClass($table, $row);
 	}
 
-	public function getTable($entity)
+	public function getTable($entity): string
 	{
 		if ($entity === 'ClientIndividual' || $entity === 'ClientCompany') {
 			return 'client';
@@ -93,7 +93,7 @@ abstract class Client extends BaseEntity
  */
 class ClientIndividual extends Client
 {
-	protected function initDefaults()
+	protected function initDefaults(): void
 	{
 		$this->type = self::TYPE_INDIVIDUAL;
 	}
@@ -105,7 +105,7 @@ class ClientIndividual extends Client
  */
 class ClientCompany extends Client
 {
-	protected function initDefaults()
+	protected function initDefaults(): void
 	{
 		$this->type = self::TYPE_COMPANY;
 	}

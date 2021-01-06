@@ -16,7 +16,10 @@ date_default_timezone_set('Europe/Prague');
 
 class TestMapper extends DefaultMapper
 {
-	protected $defaultEntityNamespace = null;
+	public function __construct()
+	{
+		$this->defaultEntityNamespace = null;
+	}
 }
 
 $connection = new Connection([

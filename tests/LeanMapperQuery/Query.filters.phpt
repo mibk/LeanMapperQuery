@@ -54,7 +54,7 @@ class Author extends Entity
 
 class BookRepository extends Repository
 {
-	public function createFluent()
+	public function createFluent(): LeanMapper\Fluent
 	{
 		return parent::createFluent();
 	}

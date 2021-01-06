@@ -15,7 +15,7 @@ require_once __DIR__ . '/../bootstrap.php';
 
 class TestRepository extends Repository
 {
-	public function createFluent()
+	public function createFluent(): LeanMapper\Fluent
 	{
 		return parent::createFluent();
 	}

@@ -12,7 +12,7 @@ require_once __DIR__ . '/../bootstrap.php';
 
 class Test2Mapper extends TestMapper
 {
-	public function getPrimaryKey($table)
+	public function getPrimaryKey($table): string
 	{
 		if ($table === 'author') {
 			return 'id_author';
@@ -20,7 +20,7 @@ class Test2Mapper extends TestMapper
 		return 'id';
 	}
 
-	public function getRelationshipColumn($sourceTable, $targetTable)
+	public function getRelationshipColumn($sourceTable, $targetTable, ?string $relationshipName = NULL): string
 	{
 		return $targetTable . '_id';
 	}

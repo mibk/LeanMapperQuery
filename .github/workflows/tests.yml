@@ -21,7 +21,7 @@ jobs:
                   coverage: none
 
             - run: composer install --no-interaction --prefer-dist
-            - run: vendor/bin/tester tests -s -p php
+            - run: vendor/bin/tester tests -s -C
             - if: failure()
               uses: actions/upload-artifact@v2
               with:

@@ -25,7 +25,7 @@ use LeanMapperQuery\IQuery;
 /**
  * @author Michal Bohuslávek
  */
-class Entity extends LeanMapper\Entity
+abstract class Entity extends LeanMapper\Entity
 {
 	/** @var array */
 	protected static $magicMethodsPrefixes = [];

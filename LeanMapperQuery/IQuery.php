@@ -14,6 +14,8 @@ use LeanMapper\IMapper;
 /**
  * @author     Michal Bohuslávek
  * @deprecated use Query instead; the IQuery interface might get removed in the future
+ *
+ * @template T of Entity
  */
 interface IQuery
 {

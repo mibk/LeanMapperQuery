@@ -23,6 +23,6 @@
 	},
 	"require-dev": {
 		"nette/tester": "~2.3.4",
-		"phpstan/phpstan": "0.12.55"
+		"phpstan/phpstan": "~1.8"
 	}
 }

@@ -31,7 +31,7 @@ abstract class Entity extends LeanMapper\Entity
 	protected static $magicMethodsPrefixes = [];
 
 	/**
-	 * @template T of Entity
+	 * @template T of \LeanMapper\Entity
 	 * @param    string    $field
 	 * @param    IQuery<T> $query
 	 * @return   T[]
@@ -41,6 +41,12 @@ abstract class Entity extends LeanMapper\Entity
 		return static::queryEntityProperty($this, $field, $query);
 	}
 
+	/**
+	 * @template T of \LeanMapper\Entity
+	 * @param    string    $field
+	 * @param    IQuery<T> $query
+	 * @return   T[]
+	 */
 	public static function queryEntityProperty(LeanMapper\Entity $entity, $field, IQuery $query)
 	{
 		if ($entity->isDetached()) {

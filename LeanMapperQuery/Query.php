@@ -24,7 +24,7 @@ use LeanMapperQuery\Exception\NonExistingMethodException;
 /**
  * @author Michal Bohuslávek
  *
- * @template T of Entity
+ * @template T of \LeanMapper\Entity
  *
  * @method $this where($cond, ...$args)
  * @method $this orderBy($field)

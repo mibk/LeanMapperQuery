@@ -34,7 +34,7 @@ Suppose we have the following repositories:
 ```php
 class BaseRepository extends LeanMapper\Repository
 {
-	public function find(IQuery $query)
+	public function find(Query $query)
 	{
 		$this->createEntities($query
 			->applyQuery($this->createFluent(), $this->mapper)
@@ -155,9 +155,9 @@ It is also possible to query an entity property (*currently only those propertie
 ```php
 class BaseEntity extends LeanMapperQuery\Entity
 {
-	protected static $magicMethodsPrefixes = array('find');
+	protected static $magicMethodsPrefixes = ['find'];
 
-	protected function find($field, IQuery $query)
+	protected function find($field, Query $query)
 	{
 		$entities = $this->queryProperty($field, $query);
 		return $this->entityFactory->createCollection($entities);

@@ -445,7 +445,7 @@ class Query implements IQuery
 
 	/**
 	 * @param  string $entityClass
-	 * @return self
+	 * @return $this
 	 */
 	public function cast($entityClass)
 	{
@@ -567,7 +567,7 @@ class Query implements IQuery
 	 * Enqueues command.
 	 * @param  string $name Command name
 	 * @param  array  $args
-	 * @return self
+	 * @return $this
 	 * @throws NonExistingMethodException
 	 */
 	public function __call($name, array $args)

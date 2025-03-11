@@ -5,15 +5,9 @@
  * for the Lean Mapper library (http://leanmapper.com)
  * Copyright (c) 2013 Michal Bohuslávek
  */
-
 namespace LeanMapperQuery;
 
 use LeanMapper;
-use LeanMapper\Filtering;
-use LeanMapper\Fluent;
-use LeanMapper\Reflection\Property;
-use LeanMapper\Relationship;
-use LeanMapper\Result;
 use LeanMapperQuery\Caller;
 use LeanMapperQuery\Exception\InvalidArgumentException;
 use LeanMapperQuery\Exception\InvalidMethodCallException;
@@ -21,6 +15,11 @@ use LeanMapperQuery\Exception\InvalidRelationshipException;
 use LeanMapperQuery\Exception\InvalidStateException;
 use LeanMapperQuery\Exception\MemberAccessException;
 use LeanMapperQuery\IQuery;
+use LeanMapper\Filtering;
+use LeanMapper\Fluent;
+use LeanMapper\Reflection\Property;
+use LeanMapper\Relationship;
+use LeanMapper\Result;
 
 /**
  * @author Michal Bohuslávek
@@ -83,7 +82,6 @@ abstract class Entity extends LeanMapper\Entity
 			$targetTable = $relationship->getTargetTable();
 			$referencingColumn = $relationship->getColumnReferencingSourceTable();
 			$rows = $entity->row->referencing($targetTable, $referencingColumn, new Filtering($filters), $strategy);
-
 		} elseif ($relationship instanceof Relationship\HasMany) {
 			$filters[] = function (Fluent $fluent) use ($mapper, $query) {
 				$query->applyQuery($fluent, $mapper, new QueryTarget\HasManyTargetTable);
@@ -148,10 +146,8 @@ abstract class Entity extends LeanMapper\Entity
 			list(, $method, $field) = $matches;
 			$field = lcfirst($field);
 			return $this->$method($field, $query);
-
 		} else {
 			return parent::__call($name, $arguments);
 		}
 	}
-
 }

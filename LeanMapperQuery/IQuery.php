@@ -5,7 +5,6 @@
  * for the Lean Mapper library (http://leanmapper.com)
  * Copyright (c) 2013 Michal Bohuslávek
  */
-
 namespace LeanMapperQuery;
 
 use LeanMapper\Fluent;
@@ -19,7 +18,6 @@ use LeanMapper\IMapper;
  */
 interface IQuery
 {
-
 	/**
 	 * @param  Fluent                   $fluent
 	 * @param  IMapper                  $mapper

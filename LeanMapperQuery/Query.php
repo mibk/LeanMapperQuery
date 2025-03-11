@@ -26,7 +26,7 @@ use LeanMapper\Result;
  * @template T of \LeanMapper\Entity
  *
  * @method $this where(string $cond, mixed ...$args)
- * @method $this orderBy(string $field)
+ * @method $this orderBy(string $field, mixed ...$args)
  * @method $this asc(bool $asc = true)
  * @method $this desc(bool $desc = true)
  * @method $this limit(int $limit)
@@ -658,8 +658,13 @@ class Query implements IQuery
 				}
 			}
 		} else {
-			$field = $this->parseStatement($field);
-			$this->fluent->orderBy($field);
+			$args = func_get_args();
+			// Only first argument is parsed. Other arguments will be maintained
+			// as parameters.
+			$statement = &$args[0];
+			$statement = $this->parseStatement($statement, null);
+			$args = $this->replaceEntitiesForItsPrimaryKeyValues($args);
+			call_user_func_array([$this->fluent, 'orderBy'], $args);
 		}
 	}
 

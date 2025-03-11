@@ -583,7 +583,7 @@ class Query implements IQuery
 
 	/////////////// basic commands //////////////////////
 
-	private function commandWhere($cond)
+	private function commandWhere($cond) // @phpstan-ignore-line
 	{
 		if (is_array($cond)) {
 			if (func_num_args() > 1) {
@@ -647,7 +647,7 @@ class Query implements IQuery
 		return $entities;
 	}
 
-	private function commandOrderBy($field)
+	private function commandOrderBy($field) // @phpstan-ignore-line
 	{
 		if (is_array($field)) {
 			foreach ($field as $key => $value) {
@@ -668,17 +668,17 @@ class Query implements IQuery
 		$this->fluent->{$asc ? 'asc' : 'desc'}();
 	}
 
-	private function commandDesc($desc = true)
+	private function commandDesc($desc = true) // @phpstan-ignore-line
 	{
 		$this->commandAsc(!$desc);
 	}
 
-	private function commandLimit($limit)
+	private function commandLimit($limit) // @phpstan-ignore-line
 	{
 		$this->fluent->limit($limit);
 	}
 
-	private function commandOffset($offset)
+	private function commandOffset($offset) // @phpstan-ignore-line
 	{
 		$this->fluent->offset($offset);
 	}

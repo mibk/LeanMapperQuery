@@ -10,7 +10,7 @@
 	],
 	"scripts": {
 		"test": "vendor/bin/tester tests -s",
-		"vet": "phpstan analyse -c phpstan.neon --no-progress --no-ansi --error-format raw"
+		"vet": "phpstan analyse -c phpstan.neon --no-progress --memory-limit 2G --no-ansi --error-format raw"
 	},
 	"autoload": {
 		"psr-0": {
@@ -23,6 +23,6 @@
 	},
 	"require-dev": {
 		"nette/tester": "~2.3.4",
-		"phpstan/phpstan": "~1.8"
+		"phpstan/phpstan": "^1.8"
 	}
 }

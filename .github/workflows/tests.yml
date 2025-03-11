@@ -1,29 +1,32 @@
 name: Tests
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
 
 jobs:
-    tests:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                php: ['7.4', '8.0', '8.1', '8.2']
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['7.4', '8.0', '8.1', '8.2']
+      fail-fast: false
 
-            fail-fast: false
+    name: PHP ${{ matrix.php }} tests
+    steps:
+      - uses: actions/checkout@v4
 
-        name: PHP ${{ matrix.php }} tests
-        steps:
-            - uses: actions/checkout@v2
-            - uses: shivammathur/setup-php@v2
-              with:
-                  php-version: ${{ matrix.php }}
-                  extensions: mbstring, tokenizer, sqlite3
-                  coverage: none
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, tokenizer, sqlite3
+          coverage: none
 
-            - run: composer install --no-interaction --prefer-dist
-            - run: vendor/bin/tester tests -s -C
-            - if: failure()
-              uses: actions/upload-artifact@v2
-              with:
-                  name: output
-                  path: tests/**/output
+      - run: composer install --no-interaction --prefer-dist
+      - run: vendor/bin/tester tests -s -C
+
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: output
+          path: tests/**/output

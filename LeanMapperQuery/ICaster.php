@@ -5,14 +5,12 @@
  * for the Lean Mapper library (http://leanmapper.com)
  * Copyright (c) 2013 Michal Bohuslávek
  */
-
 namespace LeanMapperQuery;
 
 use LeanMapper\Fluent;
 
 interface ICaster
 {
-
 	/**
 	 * @param  Fluent $fluent
 	 * @param  string $entityClass

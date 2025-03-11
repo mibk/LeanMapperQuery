@@ -5,29 +5,28 @@
  * for the Lean Mapper library (http://leanmapper.com)
  * Copyright (c) 2013 Michal Bohuslávek
  */
-
 namespace LeanMapperQuery;
 
 use LeanMapper;
+use LeanMapperQuery\Exception\InvalidArgumentException;
+use LeanMapperQuery\Exception\InvalidRelationshipException;
+use LeanMapperQuery\Exception\InvalidStateException;
+use LeanMapperQuery\Exception\MemberAccessException;
+use LeanMapperQuery\Exception\NonExistingMethodException;
 use LeanMapper\Fluent;
 use LeanMapper\IMapper;
 use LeanMapper\ImplicitFilters;
 use LeanMapper\Reflection\Property;
 use LeanMapper\Relationship;
 use LeanMapper\Result;
-use LeanMapperQuery\Exception\InvalidArgumentException;
-use LeanMapperQuery\Exception\InvalidRelationshipException;
-use LeanMapperQuery\Exception\InvalidStateException;
-use LeanMapperQuery\Exception\MemberAccessException;
-use LeanMapperQuery\Exception\NonExistingMethodException;
 
 /**
  * @author Michal Bohuslávek
  *
  * @template T of \LeanMapper\Entity
  *
- * @method $this where($cond, ...$args)
- * @method $this orderBy($field)
+ * @method $this where(string $cond, mixed ...$args)
+ * @method $this orderBy(string $field)
  * @method $this asc(bool $asc = true)
  * @method $this desc(bool $desc = true)
  * @method $this limit(int $limit)
@@ -231,7 +230,7 @@ class Query implements IQuery
 			$entityClass = $this->mapper->getEntityClass($currentTable);
 			throw new InvalidRelationshipException("Property '{$property->getName()}' in entity '$entityClass' doesn't have any relationship.");
 		}
-		$implicitFilters= [];
+		$implicitFilters = [];
 		$propertyType = $property->getType();
 		if (is_subclass_of($propertyType, 'LeanMapper\\Entity')) {
 			$caller = new Caller($this, $property);
@@ -245,14 +244,12 @@ class Query implements IQuery
 			$referencingColumn = $relationship->getColumnReferencingTargetTable();
 			// Join table.
 			$targetTableAlias = $this->joinRelatedTable($currentTableAlias, $referencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters, false);
-
 		} elseif ($relationship instanceof Relationship\BelongsTo) { // BelongsToOne, BelongsToMany
 			$targetTable = $relationship->getTargetTable();
 			$sourceTablePrimaryKey = $this->mapper->getPrimaryKey($currentTable);
 			$referencingColumn = $relationship->getColumnReferencingSourceTable();
 			// Join table.
 			$targetTableAlias = $this->joinRelatedTable($currentTableAlias, $sourceTablePrimaryKey, $targetTable, $referencingColumn, $implicitFilters);
-
 		} elseif ($relationship instanceof Relationship\HasMany) {
 			$sourceTablePrimaryKey = $this->mapper->getPrimaryKey($currentTable);
 			$relationshipTable = $relationship->getRelationshipTable();
@@ -265,7 +262,6 @@ class Query implements IQuery
 			// Don't apply filters on relationship table.
 			$relationshipTableAlias = $this->joinRelatedTable($currentTableAlias, $sourceTablePrimaryKey, $relationshipTable, $sourceReferencingColumn);
 			$targetTableAlias = $this->joinRelatedTable($relationshipTableAlias, $targetReferencingColumn, $targetTable, $targetTablePrimaryKey, $implicitFilters, false);
-
 		} else {
 			throw new InvalidRelationshipException('Unknown relationship type in property {$property->getName()}.');
 		}
@@ -287,7 +283,7 @@ class Query implements IQuery
 			if ($type === 'DateTime' || is_subclass_of($type, 'DateTime')) {
 				if ($property->hasCustomFlag(self::$typeFlagName)
 					&& preg_match('#^(DATE|Date|date)$#', $property->getCustomFlagValue(self::$typeFlagName))) {
-						return self::$placeholders['Date'];
+					return self::$placeholders['Date'];
 				} else {
 					return self::$placeholders['DateTime'];
 				}
@@ -327,7 +323,6 @@ class Query implements IQuery
 
 		if ($this->castedEntityClass) {
 			list($rootEntityClass, $rootProperties) = $this->getPropertiesByEntity($this->castedEntityClass);
-
 		} else {
 			list($rootEntityClass, $rootProperties) = $this->getPropertiesByTable($rootTableName);
 		}
@@ -405,7 +400,6 @@ class Query implements IQuery
 				$properties = $rootProperties;
 				$tableNameAlias = $tableName = $rootTableName;
 				$entityClass = $rootEntityClass;
-
 			} elseif ($replacePlaceholders && $ch === self::$defaultPlaceholder && $switches["'"] === false && $switches['"'] === false) {
 				if ($property === null) {
 					$output .= $ch;
@@ -479,14 +473,12 @@ class Query implements IQuery
 						$relationship->getRelationshipTable(),
 						$relationship->getColumnReferencingTargetTable(),
 						$targetTable,
-						$mapper->getPrimaryKey($targetTable)
+						$mapper->getPrimaryKey($targetTable),
 					);
 			}
-
 		} elseif ($target instanceof QueryTarget\HasManyTargetTable) {
 			$fluent->removeClause('LIMIT');
 			$fluent->removeClause('OFFSET');
-
 		} elseif ($target !== null) {
 			throw new InvalidArgumentException('Unsupported query target.');
 		}

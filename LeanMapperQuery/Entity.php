@@ -5,6 +5,7 @@
  * for the Lean Mapper library (http://leanmapper.com)
  * Copyright (c) 2013 Michal Bohuslávek
  */
+
 namespace LeanMapperQuery;
 
 use LeanMapper;
@@ -75,7 +76,7 @@ abstract class Entity extends LeanMapper\Entity
 
 		$rows = [];
 		if ($relationship instanceof Relationship\BelongsToMany) {
-			$filters[] = function (Fluent $fluent) use ($mapper, $query) {
+			$filters[] = function(Fluent $fluent) use ($mapper, $query) {
 				$query->applyQuery($fluent, $mapper);
 			};
 
@@ -83,7 +84,7 @@ abstract class Entity extends LeanMapper\Entity
 			$referencingColumn = $relationship->getColumnReferencingSourceTable();
 			$rows = $entity->row->referencing($targetTable, $referencingColumn, new Filtering($filters), $strategy);
 		} elseif ($relationship instanceof Relationship\HasMany) {
-			$filters[] = function (Fluent $fluent) use ($mapper, $query) {
+			$filters[] = function(Fluent $fluent) use ($mapper, $query) {
 				$query->applyQuery($fluent, $mapper, new QueryTarget\HasManyTargetTable);
 			};
 
@@ -98,7 +99,7 @@ abstract class Entity extends LeanMapper\Entity
 			$relationshipFiltering = null;
 
 			if ($strategy === Result::STRATEGY_UNION) {
-				$relationshipFiltering = new Filtering(function (Fluent $fluent) use ($mapper, $query, $relationship) {
+				$relationshipFiltering = new Filtering(function(Fluent $fluent) use ($mapper, $query, $relationship) {
 					$query->applyQuery($fluent, $mapper, new QueryTarget\HasManyRelationshipTable($relationship));
 				});
 			}

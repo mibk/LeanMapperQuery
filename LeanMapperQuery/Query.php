@@ -9,17 +9,17 @@
 namespace LeanMapperQuery;
 
 use LeanMapper;
-use LeanMapperQuery\Exception\InvalidArgumentException;
-use LeanMapperQuery\Exception\InvalidRelationshipException;
-use LeanMapperQuery\Exception\InvalidStateException;
-use LeanMapperQuery\Exception\MemberAccessException;
-use LeanMapperQuery\Exception\NonExistingMethodException;
 use LeanMapper\Fluent;
 use LeanMapper\IMapper;
 use LeanMapper\ImplicitFilters;
 use LeanMapper\Reflection\Property;
 use LeanMapper\Relationship;
 use LeanMapper\Result;
+use LeanMapperQuery\Exception\InvalidArgumentException;
+use LeanMapperQuery\Exception\InvalidRelationshipException;
+use LeanMapperQuery\Exception\InvalidStateException;
+use LeanMapperQuery\Exception\MemberAccessException;
+use LeanMapperQuery\Exception\NonExistingMethodException;
 
 /**
  * @author Michal Bohuslávek
@@ -52,12 +52,12 @@ class Query implements IQuery
 	 * @var array
 	 */
 	private static $placeholders = [
-		'string' => '%s',
-		'boolean' => '%b',
-		'integer' => '%i',
-		'float' => '%f',
+		'string'   => '%s',
+		'boolean'  => '%b',
+		'integer'  => '%i',
+		'float'    => '%f',
 		'DateTime' => '%t',
-		'Date' => '%d',
+		'Date'     => '%d',
 	];
 
 	////////////////////////////////////////////////////
@@ -487,8 +487,17 @@ class Query implements IQuery
 		return $fluent;
 	}
 
+	private static $fluentCache = [];
+
 	private function apply(Fluent $fluent, IMapper $mapper, $sourceTableName = null)
 	{
+		if ($this->hash !== null) {
+			$sum = hash_final($this->hash);
+			if (array_key_exists($sum, self::$fluentCache)) {
+				return self::$fluentCache[$sum];
+			}
+		}
+
 		// NOTE:
 		// $fluent is expected to have called method Fluent::from
 		// with pure table name as an argument. For example:
@@ -543,6 +552,10 @@ class Query implements IQuery
 			call_user_func_array([$this, $method], $args);
 		}
 
+		if ($this->hash !== null) {
+			self::$fluentCache[$sum] = $fluent;
+		}
+
 		// Reset fluent.
 		$this->fluent = null;
 		return $fluent;
@@ -555,6 +568,8 @@ class Query implements IQuery
 	{
 		return empty($this->limitQueue) ? Result::STRATEGY_IN : Result::STRATEGY_UNION;
 	}
+
+	private $hash = null;
 
 	/**
 	 * Enqueues command.
@@ -569,6 +584,12 @@ class Query implements IQuery
 		if (!method_exists($this, $method)) {
 			throw new NonExistingMethodException("Command '$name' doesn't exist. To register this command there should be defined protected method " . get_called_class() . "::$method.");
 		}
+
+		if ($this->hash === null) {
+			$this->hash = hash_init('sha1');
+		}
+
+		hash_update($this->hash, $method . json_encode($args));
 
 		switch ($name) {
 		case 'limit':

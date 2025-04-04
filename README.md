@@ -3,7 +3,7 @@ Lean Mapper Query
 
 Lean Mapper Query is a concept of a *query object* for
 [Lean Mapper library](https://github.com/Tharos/LeanMapper) which helps to build complex
-queries using automatic joins (*idea taken from [NotORM library](http://www.notorm.com/)*).
+queries using automatic joins (*idea taken from [NotORM library](https://www.notorm.com/)*).
 Look at the [suggested base classes](https://gist.github.com/mibk/9410266). For Czech
 documentation have a look at the [wiki](https://github.com/mibk/LeanMapperQuery/wiki).
 
@@ -19,7 +19,7 @@ Features
 Installation
 ------------
 
-It can be installed via [Composer](http://getcomposer.org/download).
+It can be installed via [Composer](https://getcomposer.org/download).
 
 ```
 composer require mbohuslavek/leanmapper-query

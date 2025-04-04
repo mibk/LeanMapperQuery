@@ -2,7 +2,7 @@
 
 /**
  * This file is part of the LeanMapperQuery extension
- * for the Lean Mapper library (http://leanmapper.com)
+ * for the Lean Mapper library (https://leanmapper.com)
  */
 
 namespace LeanMapperQuery\Exception;

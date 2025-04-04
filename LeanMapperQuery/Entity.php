@@ -9,6 +9,11 @@
 namespace LeanMapperQuery;
 
 use LeanMapper;
+use LeanMapper\Filtering;
+use LeanMapper\Fluent;
+use LeanMapper\Reflection\Property;
+use LeanMapper\Relationship;
+use LeanMapper\Result;
 use LeanMapperQuery\Caller;
 use LeanMapperQuery\Exception\InvalidArgumentException;
 use LeanMapperQuery\Exception\InvalidMethodCallException;
@@ -16,11 +21,6 @@ use LeanMapperQuery\Exception\InvalidRelationshipException;
 use LeanMapperQuery\Exception\InvalidStateException;
 use LeanMapperQuery\Exception\MemberAccessException;
 use LeanMapperQuery\IQuery;
-use LeanMapper\Filtering;
-use LeanMapper\Fluent;
-use LeanMapper\Reflection\Property;
-use LeanMapper\Relationship;
-use LeanMapper\Result;
 
 /**
  * @author Michal Bohuslávek

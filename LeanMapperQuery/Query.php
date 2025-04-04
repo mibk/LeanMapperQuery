@@ -9,17 +9,17 @@
 namespace LeanMapperQuery;
 
 use LeanMapper;
-use LeanMapperQuery\Exception\InvalidArgumentException;
-use LeanMapperQuery\Exception\InvalidRelationshipException;
-use LeanMapperQuery\Exception\InvalidStateException;
-use LeanMapperQuery\Exception\MemberAccessException;
-use LeanMapperQuery\Exception\NonExistingMethodException;
 use LeanMapper\Fluent;
 use LeanMapper\IMapper;
 use LeanMapper\ImplicitFilters;
 use LeanMapper\Reflection\Property;
 use LeanMapper\Relationship;
 use LeanMapper\Result;
+use LeanMapperQuery\Exception\InvalidArgumentException;
+use LeanMapperQuery\Exception\InvalidRelationshipException;
+use LeanMapperQuery\Exception\InvalidStateException;
+use LeanMapperQuery\Exception\MemberAccessException;
+use LeanMapperQuery\Exception\NonExistingMethodException;
 
 /**
  * @author Michal Bohuslávek
@@ -52,12 +52,12 @@ class Query implements IQuery
 	 * @var array
 	 */
 	private static $placeholders = [
-		'string' => '%s',
-		'boolean' => '%b',
-		'integer' => '%i',
-		'float' => '%f',
+		'string'   => '%s',
+		'boolean'  => '%b',
+		'integer'  => '%i',
+		'float'    => '%f',
 		'DateTime' => '%t',
-		'Date' => '%d',
+		'Date'     => '%d',
 	];
 
 	////////////////////////////////////////////////////

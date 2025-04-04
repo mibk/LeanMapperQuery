@@ -85,7 +85,6 @@ abstract class Client extends BaseEntity
 {
 	const TYPE_INDIVIDUAL = 'individual';
 	const TYPE_COMPANY    = 'company';
-
 }
 
 /**
@@ -124,10 +123,10 @@ class Tag extends BaseEntity
 
 $sqls = [];
 $connection = new LeanMapper\Connection([
-	'driver' => 'sqlite3',
+	'driver'   => 'sqlite3',
 	'database' => __DIR__ . '/../db/clients.sq3',
 ]);
-$connection->onEvent[] = function ($event) use (&$sqls) {
+$connection->onEvent[] = function($event) use (&$sqls) {
 	$sqls[] = $event->sql;
 };
 $mapper = new ClientMapper;
@@ -161,9 +160,8 @@ Assert::same(1, count($clients));
 Assert::same('Seznam.cz', $clients[0]->name);
 Assert::same('ClientCompany', get_class($clients[0]));
 
-Assert::exception(function () use ($clientRepository) {
+Assert::exception(function() use ($clientRepository) {
 	$clientRepository->find(getQuery()->cast('Tag'));
-
 }, 'LeanMapperQuery\Exception\InvalidArgumentException', 'Query object is limited to Tag entity, Client entity used.');
 
 //////// entity query ////////
@@ -200,7 +198,6 @@ Assert::same(1, count($tagClients));
 Assert::same('Seznam.cz', $tagClients[0]->name);
 Assert::same('ClientCompany', get_class($tagClients[0]));
 
-Assert::exception(function () use ($tag) {
+Assert::exception(function() use ($tag) {
 	$tag->find('clients', getQuery()->cast('Tag'));
-
 }, 'LeanMapperQuery\Exception\InvalidArgumentException', 'Query object is limited to Tag entity, Client entity used.');

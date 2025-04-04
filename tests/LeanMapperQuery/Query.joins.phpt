@@ -174,7 +174,7 @@ $expected = getFluent('book')
 	->groupBy('[book].[id]');
 Assert::same((string) $expected, (string) $fluent);
 
-Assert::throws(function () use ($mapper){
+Assert::throws(function() use ($mapper) {
 	getQuery()
 		->where('@foo', 3)
 		->applyQuery(getFluent('author'), $mapper);

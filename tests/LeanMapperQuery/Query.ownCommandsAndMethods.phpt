@@ -52,6 +52,6 @@ $expected = getFluent('book')
 	->where('([book].[name] = %s)', 'PHP');
 Assert::same($expected->_export(), $fluent->_export());
 
-Assert::exception(function () use ($query) {
+Assert::exception(function() use ($query) {
 	$query->wrong();
 }, 'LeanMapperQuery\\Exception\\InvalidStateException');

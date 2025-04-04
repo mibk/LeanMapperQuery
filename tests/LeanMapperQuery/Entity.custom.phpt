@@ -89,19 +89,19 @@ Assert::same(0, count($authorBooks));
 // exceptions
 $book = $books[2];
 
-Assert::exception(function () use ($book) {
+Assert::exception(function() use ($book) {
 	$book->find('author', getQuery());
 }, 'LeanMapperQuery\\Exception\\InvalidRelationshipException');
 
-Assert::exception(function () use ($book) {
+Assert::exception(function() use ($book) {
 	$book->find('name', getQuery());
 }, 'LeanMapperQuery\\Exception\\InvalidArgumentException');
 
-Assert::exception(function () use ($book) {
+Assert::exception(function() use ($book) {
 	$book->find('xyz', getQuery());
 }, 'LeanMapperQuery\\Exception\\MemberAccessException');
 
-Assert::exception(function () {
+Assert::exception(function() {
 	$book = new Book;
 	$book->find('xyz', getQuery());
 }, 'LeanMapperQuery\\Exception\\InvalidStateException');

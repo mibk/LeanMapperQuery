@@ -1,10 +1,10 @@
 <?php
 
-use LeanMapperQuery\Query;
 use LeanMapper\Connection;
 use LeanMapper\DefaultEntityFactory;
 use LeanMapper\DefaultMapper;
 use LeanMapper\Fluent;
+use LeanMapperQuery\Query;
 
 if (@!include __DIR__ . '/../vendor/autoload.php') {
 	echo 'Install Nette Tester using `composer update --dev`';
@@ -23,7 +23,7 @@ class TestMapper extends DefaultMapper
 }
 
 $connection = new Connection([
-	'driver' => 'sqlite3',
+	'driver'   => 'sqlite3',
 	'database' => __DIR__ . '/db/library.sq3',
 ]);
 

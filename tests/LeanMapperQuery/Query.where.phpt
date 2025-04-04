@@ -100,7 +100,7 @@ Assert::same($expected->_export(), $fluent->_export());
 $fluent = getFluent('book');
 getQuery()
 	->where([
-		'@name' => $bookNames,
+		'@name'      => $bookNames,
 		'@available' => false,
 	])
 	->applyQuery($fluent, $mapper);

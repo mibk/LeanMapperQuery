@@ -41,7 +41,7 @@ class Book extends Entity
 {
 	public function test()
 	{
-		$this->row->referencing('book_tag', 'book_id', new Filtering(function (Fluent $fluent) {
+		$this->row->referencing('book_tag', 'book_id', new Filtering(function(Fluent $fluent) {
 			$expected = [
 				'FROM',
 				'%n',

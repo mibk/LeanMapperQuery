@@ -49,12 +49,13 @@ class Book extends BaseEntity
 ////////////////
 
 $sqls = [];
-$connection->onEvent[] = function ($event) use (&$sqls) {
+$connection->onEvent[] = function($event) use (&$sqls) {
 	$sqls[] = $event->sql;
 };
 $bookRepository = new BookRepository($connection, $mapper, $entityFactory);
 
-function extractTags(BookRepository $bookRepository, $tagProperty, Query $query) {
+function extractTags(BookRepository $bookRepository, $tagProperty, Query $query)
+{
 	$result = [];
 
 	foreach ($bookRepository->findAll() as $book) {
@@ -63,7 +64,6 @@ function extractTags(BookRepository $bookRepository, $tagProperty, Query $query)
 		if (count($tags) <= 1) {
 			$tag = reset($tags);
 			$result[$book->id] = $tag ? $tag->name : null;
-
 		} else {
 			foreach ($tags as $tag) {
 				$result[$book->id][] = $tag->name;

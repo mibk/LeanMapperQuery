@@ -492,9 +492,10 @@ class Query implements IQuery
 	private function apply(Fluent $fluent, IMapper $mapper, $sourceTableName = null)
 	{
 		if ($this->hash !== null) {
-			$sum = hash_final($this->hash);
+			$h = hash_copy($this->hash);
+			$sum = hash_final($h);
 			if (array_key_exists($sum, self::$fluentCache)) {
-				return self::$fluentCache[$sum];
+				return clone self::$fluentCache[$sum];
 			}
 		}
 
@@ -552,8 +553,8 @@ class Query implements IQuery
 			call_user_func_array([$this, $method], $args);
 		}
 
-		if ($this->hash !== null) {
-			self::$fluentCache[$sum] = $fluent;
+		if (isset($sum)) {
+			self::$fluentCache[$sum] = clone $fluent;
 		}
 
 		// Reset fluent.

@@ -57,7 +57,7 @@ abstract class Entity extends LeanMapper\Entity
 			throw new MemberAccessException("Cannot access undefined property '$field' in entity " . get_called_class() . '.');
 		}
 		if (!$property->hasRelationship()) {
-			throw new InvalidArgumentException("Property '{$property->getName()}' in entity ". get_called_class() . " has no relationship.");
+			throw new InvalidArgumentException("Property '{$property->getName()}' in entity " . get_called_class() . " has no relationship.");
 		}
 		$class = $property->getType();
 		$filters = $entity->createImplicitFilters($class, new Caller($entity, $property))->getFilters();
@@ -136,12 +136,12 @@ abstract class Entity extends LeanMapper\Entity
 
 	public function __call($name, array $arguments)
 	{
-		if (preg_match('#^('.implode('|', static::$magicMethodsPrefixes).')(.+)$#', $name, $matches)) {
+		if (preg_match('#^(' . implode('|', static::$magicMethodsPrefixes) . ')(.+)$#', $name, $matches)) {
 			if (count($arguments) !== 1) {
 				throw new InvalidMethodCallException(get_called_class() . "::$name expects exactly 1 argument. " . count($arguments) . ' given.');
 			}
 			list($query) = $arguments;
-			if (!$query instanceof IQuery) {
+			if (! $query instanceof IQuery) {
 				throw new InvalidArgumentException('Argument 1 passed to ' . get_called_class() . "::$name must implement interface LeanMapperQuery\\IQuery. " . gettype($query) . ' given.');
 			}
 			list(, $method, $field) = $matches;

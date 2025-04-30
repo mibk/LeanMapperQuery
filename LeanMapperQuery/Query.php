@@ -346,7 +346,7 @@ class Query implements IQuery
 			// properties attached to the end of the statement.
 			$ch = isset($statement[$i]) ? $statement[$i] : '';
 			if ($switches['@'] === true) {
-				if (preg_match('#^'.($firstLetter ? self::$variablePatternFirstLetter : self::$variablePatternOtherLetters).'$#', $ch)) {
+				if (preg_match('#^' . ($firstLetter ? self::$variablePatternFirstLetter : self::$variablePatternOtherLetters) . '$#', $ch)) {
 					$propertyName .= $ch;
 					$firstLetter = false;
 				} else {
@@ -603,7 +603,7 @@ class Query implements IQuery
 			$operators = ['=', '<>', '!=', '<=>', '<', '<=', '>', '>='];
 			$variablePattern = self::$variablePatternFirstLetter . self::$variablePatternOtherLetters . '*';
 			if (count($args) === 2
-				&& preg_match('#^\s*(@(?:'.$variablePattern.'|\.)*'.$variablePattern.')\s*(|'.implode('|', $operators).')\s*(?:\?\s*)?$#', $args[0], $matches)) {
+				&& preg_match('#^\s*(@(?:' . $variablePattern . '|\.)*' . $variablePattern . ')\s*(|' . implode('|', $operators) . ')\s*(?:\?\s*)?$#', $args[0], $matches)) {
 				$replacePlaceholders = true;
 				$field = &$args[0];
 				list(, $field, $operator) = $matches;

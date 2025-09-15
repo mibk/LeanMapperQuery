@@ -22,7 +22,7 @@
 		"tharos/leanmapper": ">=3.0"
 	},
 	"require-dev": {
-		"nette/tester": "~2.3.4",
+		"nette/tester": "~2.0",
 		"phpstan/phpstan": "^1.8"
 	}
 }

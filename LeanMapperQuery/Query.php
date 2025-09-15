@@ -455,7 +455,7 @@ class Query implements IQuery
 	 * @inheritdoc
 	 * @throws InvalidArgumentException
 	 */
-	public function applyQuery(Fluent $fluent, IMapper $mapper, QueryTarget\ITarget $target = null)
+	public function applyQuery(Fluent $fluent, IMapper $mapper, ?QueryTarget\ITarget $target = null)
 	{
 		$targetTable = null;
 

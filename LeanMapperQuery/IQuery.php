@@ -25,7 +25,7 @@ interface IQuery
 	 * @param  QueryTarget\ITarget|null $target
 	 * @return Fluent
 	 */
-	public function applyQuery(Fluent $fluent, IMapper $mapper, QueryTarget\ITarget $target = null);
+	public function applyQuery(Fluent $fluent, IMapper $mapper, ?QueryTarget\ITarget $target = null);
 
 	/**
 	 * @return string
